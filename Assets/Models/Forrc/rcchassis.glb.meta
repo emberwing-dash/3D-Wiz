@@ -1,0 +1,128 @@
+- !<AssetImportMetadata/7773b7a5-9be4-47d9-9737-dbd701425a21>
+  ImportedAssetIds:
+    .hidden/cad_0: !<reference> 7205f361-7816-44da-9ce7-0e4e3c6ca69f
+    15de38c8a3b937dc: !<reference> 939385e6-76f0-4d68-876e-c6964870b20b
+    26ba073d67b9d0dd: !<reference> bee06c74-ebb5-43f3-bd05-361cdd99491e
+    5864569d6acec931: !<reference> 28d3aac0-47c8-4fa6-abe2-f6c92403ecca
+    88ab437fd121cc69: !<reference> 0256cff4-5576-4f55-9768-7e17d9512293
+    8c2c6f3cf8d060fd: !<reference> 278b0f58-9976-45f6-bf6b-727f08674693
+    Materials/cad_0: !<reference> 915f529c-936d-49d3-a39e-759b5e971ad5
+    Materials/cad_0|cad_0|GraphPassInfo: !<reference> 6adec21e-df6f-4ccd-890c-fc5d053286e3
+    Meshes/rcchassis: !<reference> 022e9b45-28b9-4cb2-a862-f90ce5312822
+    Scene: !<reference> bb468bb3-fda6-400b-ae1d-f7296bae21a5
+  ImporterName: GltfImporter
+  PrimaryAsset: !<reference> bb468bb3-fda6-400b-ae1d-f7296bae21a5
+  PackageType: LegacyPackage
+  LegacyPackagePolicy: CanBeUnpackedTransparent
+  ExtraData:
+    {}
+  AssetDataMap:
+    Scene: !<own> 25489a2d-f019-42ae-85d5-eb534d3c7a35
+  DependentFiles:
+    []
+  ImporterSettings: !<GltfImporterSettings>
+    UseLegacyImporter: false
+    WithMaterials: true
+    NamingConvention: ByCategorySanitizeV2
+    PersistentIdGenerationAlgorithm: DescriptorBasedV2
+    AnimationCurveOptimization: true
+    CustomAnimationSamplingRate: 30.000000
+    ImportVertexColor: true
+    ImportTangents: true
+    ImportMorphTargetAnimation: true
+    ConvertMetersToCentimeters: true
+    RegenerateTangents: false
+    OptimizeMesh: true
+  CompressionSettings: !<ComplexCompressionSettings>
+    Presets:
+      None Compression: !<FileCompressionSettings>
+        {}
+    ExtensionMappings:
+      mesh: None Compression
+    Overrides:
+      {}
+- !<SceneObject/0256cff4-5576-4f55-6897-81e826aedd6c>
+  PrefabRemaps:
+    []
+  Name: Scenes
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 278b0f58-9976-45f6-4094-8d80f798b96c
+  Components:
+    []
+- !<ObjectPrefabAssetData/25489a2d-f019-42ae-85d5-eb534d3c7a35>
+  Prototype: !<ObjectOwner/5d563b36-495e-4102-b76f-79f5ad831f69>
+    PackagePath: ""
+    objects:
+      - !<own> bee06c74-ebb5-43f3-42fa-c9e32266b6e1
+- !<SceneObject/278b0f58-9976-45f6-4094-8d80f798b96c>
+  PrefabRemaps:
+    []
+  Name: Scene0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 28d3aac0-47c8-4fa6-541d-0936dbfc1335
+  Components:
+    []
+- !<SceneObject/28d3aac0-47c8-4fa6-541d-0936dbfc1335>
+  PrefabRemaps:
+    []
+  Name: rcchassis
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 939385e6-76f0-4d68-7891-3969b78f4df4
+- !<RenderMeshVisual/939385e6-76f0-4d68-7891-3969b78f4df4>
+  PrefabRemaps:
+    []
+  Name: rcchassis
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 915f529c-936d-49d3-a39e-759b5e971ad5
+  Mesh: !<reference> 022e9b45-28b9-4cb2-a862-f90ce5312822
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/bee06c74-ebb5-43f3-42fa-c9e32266b6e1>
+  PrefabRemaps:
+    []
+  Name: rcchassis
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 100.000000, y: 100.000000, z: 100.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 0256cff4-5576-4f55-6897-81e826aedd6c
+  Components:
+    []

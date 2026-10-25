@@ -1,0 +1,77 @@
+- !<AssetImportMetadata/e6538177-a239-464d-8ff7-e184d0a2ac8e>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> a3277308-c32a-4672-a9d2-5022102a881d
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> a3277308-c32a-4672-a9d2-5022102a881d
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 4e2cbe9f-e998-4baf-87e5-d0768e9f6d11
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/4e2cbe9f-e998-4baf-87e5-d0768e9f6d11>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: e2c918b1-e088-4016-9af7-1028c3f8e36f
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    boxMesh: false
+    cylinderMesh: false
+    debugLog: false
+    faceMaterial: false
+    litMaterial: false
+    sphereMesh: false
+    unlitMaterial: false
+    userModel: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - userModel: !<reference.ObjectPrefab> 00000000-0000-0000-0000-000000000000
+      boxMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+      sphereMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+      cylinderMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+      litMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      unlitMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      faceMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      debugLog: false
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"label", "label":"<span style=\"color: #60A5FA;\">WizVisualize - virtual try-before-you-build workbench</span>"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"Your model"}'
+    - '// @input Asset.ObjectPrefab userModel {"hint":"Optional: drop YOUR own model here (a GLB/FBX/OBJ imported as a prefab). Empty = the bundled Sesame frame. Its interior is estimated from its bounding box."}'
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"References"}'
+    - '// @input Asset.RenderMesh boxMesh {"hint":"Unit cube mesh (1 cm)"}'
+    - '// @input Asset.RenderMesh sphereMesh {"hint":"Unit sphere mesh (1 cm)"}'
+    - '// @input Asset.RenderMesh cylinderMesh {"hint":"Unit cylinder mesh (1 cm)"}'
+    - '// @input Asset.Material litMaterial {"hint":"Lit glTF material"}'
+    - '// @input Asset.Material unlitMaterial {"hint":"Unlit material (boxes, outlines)"}'
+    - '// @input Asset.Material faceMaterial {"hint":"Unlit material with Base Texture enabled (simulated OLED)"}'
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"Settings"}'
+    - '// @input bool debugLog {"hint":"Log events (debug)"}'
+    - '// @ui {"widget":"group_end"}'

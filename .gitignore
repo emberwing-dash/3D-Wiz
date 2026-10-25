@@ -1,0 +1,18 @@
+# Lens Studio generated / local state (regenerated when the project is opened)
+Cache/
+Support/
+Workspaces/
+PluginsUserPreferences/
+Plugins/
+*.lock
+.virtual-scene.json
+leaf_plugin_settings.json
+# agent / editor tooling
+.claude/
+.codex/
+.cursor/
+.vscode/
+.mcp.json
+# never commit keys
+*.pem
+*.key

@@ -1,0 +1,138 @@
+- !<AssetImportMetadata/171539ea-6ced-45d4-adf6-eaffd28beb55>
+  ImportedAssetIds:
+    .hidden/cad_0: !<reference> cb9958cd-77d5-43fa-83f3-baca61b76036
+    1af6c03c3df3e48c: !<reference> 3829bd28-e560-49f7-b17a-7d90fbdcb0b2
+    26ba073d67b9d0dd: !<reference> 46bcb9e1-903f-4cc1-807f-a6a8b339fb51
+    6b00c5a9f03b8470: !<reference> 76f7c743-1861-4208-a77f-c457d75c38ff
+    88ab437fd121cc69: !<reference> e2eb5106-1129-4b20-9541-55956fba3b98
+    8c2c6f3cf8d060fd: !<reference> 1d0eb821-7af1-4e1d-8c5f-de65c28d76c6
+    9482b3b7632087a8: !<reference> f06451da-5576-4b28-b412-9129352ec89b
+    Materials/cad_0: !<reference> 50f5366e-bd11-4198-9031-64481f4cc276
+    Materials/cad_0|cad_0|GraphPassInfo: !<reference> 40ab9363-4f3d-4ef0-9eef-4de6c2780815
+    Materials/cad_1: !<reference> 879e029c-2aef-48ca-89a4-110a9db2c5c1
+    Materials/cad_1|cad_1|GraphPassInfo: !<reference> 0fcf36b5-db59-4a40-b381-578ffe4ff346
+    Materials/cad_2: !<reference> 9d313638-dd01-4d39-bb5f-ab64e88de73a
+    Materials/cad_2|cad_2|GraphPassInfo: !<reference> 9d73c20d-9a61-4a4f-9b57-172f4053c7ca
+    Meshes/Buzzer_12x95RM76_c0: !<reference> 506ab8f9-6c9b-4e9e-890e-8abe9160b7b3
+    Meshes/Buzzer_12x95RM76_c1: !<reference> cfac8809-91be-427f-8514-d5c10e0b138b
+    Meshes/Buzzer_12x95RM76_c2: !<reference> 018a1ff2-6f9d-4a30-b765-f4fe17efb07f
+    Scene: !<reference> b00bcda2-06fa-4ec0-87b7-3cf417a4b8bd
+    acbb98ffa211cb3e: !<reference> 2dcea993-57da-4843-8846-2bcb97666e27
+    b3f4487d945ec91c: !<reference> 19e49f76-9237-4eca-83aa-eefb1c3d0bce
+    f00e22609acc35d5: !<reference> 79e3617e-8584-4f85-9785-d9d705c97d18
+  ImporterName: GltfImporter
+  PrimaryAsset: !<reference> b00bcda2-06fa-4ec0-87b7-3cf417a4b8bd
+  PackageType: LegacyPackage
+  LegacyPackagePolicy: CanBeUnpackedTransparent
+  ExtraData:
+    {}
+  AssetDataMap:
+    Scene: !<own> 1035d6f1-0ecc-489b-a90a-e22b55cc95d1
+  DependentFiles:
+    []
+  ImporterSettings: !<GltfImporterSettings>
+    UseLegacyImporter: false
+    WithMaterials: true
+    NamingConvention: ByCategorySanitizeV2
+    PersistentIdGenerationAlgorithm: DescriptorBasedV2
+    AnimationCurveOptimization: true
+    CustomAnimationSamplingRate: 30.000000
+    ImportVertexColor: true
+    ImportTangents: true
+    ImportMorphTargetAnimation: true
+    ConvertMetersToCentimeters: true
+    RegenerateTangents: false
+    OptimizeMesh: true
+  CompressionSettings: !<ComplexCompressionSettings>
+    Presets:
+      None Compression: !<FileCompressionSettings>
+        {}
+    ExtensionMappings:
+      mesh: None Compression
+    Overrides:
+      {}
+- !<ObjectPrefabAssetData/1035d6f1-0ecc-489b-a90a-e22b55cc95d1>
+  Prototype: !<ObjectOwner/a6add168-1249-43e5-8e37-99a97aab0461>
+    PackagePath: ""
+    objects:
+      - !<own> 46bcb9e1-903f-4cc1-7f80-59574cc604ae
+- !<SceneObject/1d0eb821-7af1-4e1d-73a0-219a3d728939>
+  PrefabRemaps:
+    []
+  Name: Scene0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> df4f3804-7a34-4475-63d3-029f9c4a8b60
+  Components:
+    []
+- !<SceneObject/46bcb9e1-903f-4cc1-7f80-59574cc604ae>
+  PrefabRemaps:
+    []
+  Name: buzzer
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 100.000000, y: 100.000000, z: 100.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> e2eb5106-1129-4b20-6abe-aa6a9045c467
+  Components:
+    []
+- !<RenderMeshVisual/96aa0a54-ae55-4172-7522-5576d9a82663>
+  PrefabRemaps:
+    []
+  Name: Buzzer_12x95RM76
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 50f5366e-bd11-4198-9031-64481f4cc276
+  Mesh: !<reference> 00e1e1d2-d342-44b9-b726-b7c379263721
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/df4f3804-7a34-4475-63d3-029f9c4a8b60>
+  PrefabRemaps:
+    []
+  Name: Buzzer_12x95RM76
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 96aa0a54-ae55-4172-7522-5576d9a82663
+- !<SceneObject/e2eb5106-1129-4b20-6abe-aa6a9045c467>
+  PrefabRemaps:
+    []
+  Name: Scenes
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 1d0eb821-7af1-4e1d-73a0-219a3d728939
+  Components:
+    []

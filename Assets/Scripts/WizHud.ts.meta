@@ -1,0 +1,65 @@
+- !<AssetImportMetadata/b93bae17-488d-4a6b-b835-cd76a31d9838>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 7ee24e7a-1e1f-4bab-afff-5a4c28414441
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 7ee24e7a-1e1f-4bab-afff-5a4c28414441
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 45ac7679-36fb-4dab-9b79-6b476c0e3118
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/45ac7679-36fb-4dab-9b79-6b476c0e3118>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: 3495ec6f-f7ab-46e9-89bf-62abea1ee296
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    boxMesh: false
+    cylinderMesh: false
+    faceMaterial: false
+    litMaterial: false
+    sphereMesh: false
+    unlitMaterial: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - boxMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+      sphereMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+      cylinderMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+      litMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      unlitMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      faceMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"label", "label":"<span style=\"color: #60A5FA;\">WizHud - pips, XP, badges, \"i\" card</span>"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"References"}'
+    - '// @input Asset.RenderMesh boxMesh {"hint":"Unit cube mesh (1 cm)"}'
+    - '// @input Asset.RenderMesh sphereMesh {"hint":"Unit sphere mesh (1 cm)"}'
+    - '// @input Asset.RenderMesh cylinderMesh {"hint":"Unit cylinder mesh (1 cm)"}'
+    - '// @input Asset.Material litMaterial {"hint":"Lit glTF material"}'
+    - '// @input Asset.Material unlitMaterial {"hint":"Unlit material"}'
+    - '// @input Asset.Material faceMaterial {"hint":"Unlit material with Base Texture enabled (icons)"}'
+    - '// @ui {"widget":"group_end"}'

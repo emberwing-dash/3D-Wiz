@@ -1,0 +1,133 @@
+- !<AssetImportMetadata/3e71f1c2-6cca-4783-b026-8a37981453b5>
+  ImportedAssetIds:
+    .hidden/cad_0: !<reference> d79e9015-e887-4f2f-897c-a85c53b177e8
+    26ba073d67b9d0dd: !<reference> 3f1f6add-ce4e-47e0-bfc1-c8e8152daf17
+    4770c33c4a4d6ac9: !<reference> 79a738be-6998-4f4e-95e7-d05926f6ce7c
+    88ab437fd121cc69: !<reference> bb04baaa-c7f1-4f08-ac8c-5fb6214f90e5
+    8c2c6f3cf8d060fd: !<reference> 4b48317f-7bda-495b-974b-e6a9e59fa20f
+    9bf04d265a395ea8: !<reference> 36a765e7-22ae-432e-ad58-ef287c40ab7d
+    Materials/cad_0: !<reference> 2ce33cde-6bd5-4c85-960c-245fa753df10
+    Materials/cad_0|cad_0|GraphPassInfo: !<reference> 0d683a36-57cf-4089-8ff9-3b4b30b7dc9a
+    Materials/cad_1: !<reference> 48d95083-5a6e-4c63-9b43-3ce4626e8536
+    Materials/cad_1|cad_1|GraphPassInfo: !<reference> 78d76a42-b536-4513-b6dc-43d76f3101fd
+    Meshes/DIP-16_W7.62mm_c0: !<reference> 40d6da37-43bb-46df-8c3e-b2cdb167e070
+    Meshes/DIP-16_W7.62mm_c1: !<reference> 51a92040-31ab-412b-ac6b-83bd14c7e875
+    Scene: !<reference> a818c524-e955-4c72-b8cc-46d4c4459935
+    c84801af1af6e770: !<reference> 7d1d0805-452b-4eeb-8f36-a2d0ae1af05b
+    d31906a9a2531d9d: !<reference> 436728dc-6947-4f51-b7c2-99f4d7a1e641
+  ImporterName: GltfImporter
+  PrimaryAsset: !<reference> a818c524-e955-4c72-b8cc-46d4c4459935
+  PackageType: LegacyPackage
+  LegacyPackagePolicy: CanBeUnpackedTransparent
+  ExtraData:
+    {}
+  AssetDataMap:
+    Scene: !<own> ecb79ec5-99f4-4fd2-9b82-e2d1c8b0384c
+  DependentFiles:
+    []
+  ImporterSettings: !<GltfImporterSettings>
+    UseLegacyImporter: false
+    WithMaterials: true
+    NamingConvention: ByCategorySanitizeV2
+    PersistentIdGenerationAlgorithm: DescriptorBasedV2
+    AnimationCurveOptimization: true
+    CustomAnimationSamplingRate: 30.000000
+    ImportVertexColor: true
+    ImportTangents: true
+    ImportMorphTargetAnimation: true
+    ConvertMetersToCentimeters: true
+    RegenerateTangents: false
+    OptimizeMesh: true
+  CompressionSettings: !<ComplexCompressionSettings>
+    Presets:
+      None Compression: !<FileCompressionSettings>
+        {}
+    ExtensionMappings:
+      mesh: None Compression
+    Overrides:
+      {}
+- !<SceneObject/127b7969-0c21-44d6-4f6b-d36cefc0e28e>
+  PrefabRemaps:
+    []
+  Name: DIP-16_W7.62mm
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> f9f0aed4-4895-46d5-5b1c-0ce0863dc7c4
+- !<SceneObject/3f1f6add-ce4e-47e0-403e-3717ead250e8>
+  PrefabRemaps:
+    []
+  Name: dip16
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 100.000000, y: 100.000000, z: 100.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> bb04baaa-c7f1-4f08-5373-a049deb06f1a
+  Components:
+    []
+- !<SceneObject/4b48317f-7bda-495b-68b4-19561a605df0>
+  PrefabRemaps:
+    []
+  Name: Scene0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 127b7969-0c21-44d6-4f6b-d36cefc0e28e
+  Components:
+    []
+- !<SceneObject/bb04baaa-c7f1-4f08-5373-a049deb06f1a>
+  PrefabRemaps:
+    []
+  Name: Scenes
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 4b48317f-7bda-495b-68b4-19561a605df0
+  Components:
+    []
+- !<ObjectPrefabAssetData/ecb79ec5-99f4-4fd2-9b82-e2d1c8b0384c>
+  Prototype: !<ObjectOwner/e9c060b7-2708-404f-ac03-a262df8ba299>
+    PackagePath: ""
+    objects:
+      - !<own> 3f1f6add-ce4e-47e0-403e-3717ead250e8
+- !<RenderMeshVisual/f9f0aed4-4895-46d5-5b1c-0ce0863dc7c4>
+  PrefabRemaps:
+    []
+  Name: DIP-16_W7.62mm
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 2ce33cde-6bd5-4c85-960c-245fa753df10
+  Mesh: !<reference> c93b85e8-65f4-4e4d-8d07-b83aa337edfb
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}

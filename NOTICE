@@ -1,0 +1,57 @@
+3D Wiz
+Copyright (c) the 3D Wiz authors.
+
+This project includes content derived from the open-source "Sesame Robot" project, licensed under the
+Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0).
+
+  Sesame Robot - an open-source, 3D-printed, ESP32 quadruped with a face.
+  Original design: Dorian Borian (https://github.com/dorianborian/sesame-robot)
+  Hardware replication, circuit assembly, servo calibration and testing: Soham Kadu
+  (repository used as the reference: soham0777/sesame-robot).
+
+Derived material in this project (all prepared offline, changes stated):
+  - Assets/Models/Sesame/*.glb : the printed-part meshes converted from the repo STL files
+      Internal-Frame-v121, Bottom-Cover-v121, L1..L4-v117, R1..R4-v117, Top-Cover-Cat-v100.
+    Changes: units millimetres -> glTF metres (shown in centimetres), axes re-oriented, mirrored/rotated into one
+    assembly frame (placement is illustrative), re-centred on each part's joint pivot, a flat colour material added.
+    No geometry was simplified or edited.
+  - Assets/Scripts/WizFaces.ts : OLED face bitmaps extracted from firmware/face-bitmaps.h (unchanged pixels).
+  - Assets/Scripts/ProjectPack.ts : servo pins/names, I2C pins/address, wiring and movement sequences transcribed
+    from firmware/sesame-firmware-main.ino, firmware/movement-sequences.h, docs/wiring-guide and docs/build-guide.
+
+Electronics models (Lolin S2 Mini, buck converter, battery, rocker switch, header strip, SSD1306 OLED, MG90S servo)
+are built from primitives at standard sizes that are NOT from the repo; they are labelled as such in the app.
+
+The Apache-2.0 licence text of the original project is available at the URL above and in the upstream repository
+(LICENSE). Modified files carry this notice of change.
+
+----------------------------------------------------------------------------------------------------------------------
+Additional example projects (Revision 4). Each was read OFFLINE from the cited public source; nothing was copied verbatim
+except pin numbers, names and behaviours listed in the pack files (Assets/Scripts/Pack*.ts). Part shapes are drawn here.
+
+  ESP32 Desktop Pet  - https://github.com/SukunDev/ESP32-Pet-Robot  (MIT License, (c) 2025 SukunDev). Pins and behaviours from README.md.
+  Obstacle Car       - https://github.com/sanjana-n07/Obstacle-Avoiding-Robot  (MIT License, (c) 2026 sanjana-n07). Pins, SAFE_DISTANCE and
+                       behaviour from README.md and Obstracle_Avoiding_Robot.ino.
+  Servo Hand         - https://github.com/SATHv1kk/bionic-arm-flex-sensor-control  (MIT License). Pin map, power rules, SG90 / flex-sensor
+                       facts from README.md, docs/wiring.md, docs/hardware.md, hardware/bom.csv, firmware/bionic_hand/config.h.
+  Button LED         - Arduino documentation, "How to Wire and Program a Button" and "Blink"
+                       (https://github.com/arduino/docs-content, Creative Commons Attribution-ShareAlike 4.0). Wiring facts only;
+                       this project's pack data is shared under the same licence (CC BY-SA 4.0).
+
+MIT License text: permission is granted, free of charge, to use, copy, modify and distribute the software and associated
+documentation, provided the copyright notice and this permission notice are included. See each upstream repository's LICENSE.
+
+Offline CAD converter (tools/cad, development tool only, not part of the Lens): occt-import-js 0.0.23 (LGPL-2.1) built on Open CASCADE Technology (LGPL-2.1).
+
+----------------------------------------------------------------------------------------------------------------------
+Revision 5 (Circuit Lab, RC Car, CAD import)
+  RC Car (FORRC)     - circuit_ref/forrc  (https://github.com/codingwithsomeguy/forrc), CERN-OHL-S v2 (strongly reciprocal). The 8 printed parts
+                       in Assets/Models/Forrc are the repo STL files converted to GLB (mm -> cm, Z-up -> Y-up, no geometry edited); the BOM
+                       (bom/exported/rccar-bom-v1.csv) lists the electronics. The repo has NO wiring: the reference circuit is this project's design.
+  LHS Micro-D chassis - circuit_ref/LHS-RC-MICRO-D-24R-Chassis (https://github.com/lhndo/LHS-RC-MICRO-D-24R-Chassis), CC BY-NC-SA 4.0
+                       (non-commercial). Assets/UserModels/microd_80k.glb is the STEP file converted and reduced from 425,301 to 79,831
+                       triangles (vertex clustering) as an upload demo. Do not use it commercially.
+  Component CAD (Assets/Models/Parts, parts.json lists each source): KiCad kicad-packages3D (CC-BY-SA 4.0 with the KiCad library exception):
+                       LED, resistor, 1N4004 diode, TO-92 transistor, DIP-16 (L293D / 74HC595), tactile button, buzzer, ESP32-WROOM-32.
+                       Adafruit_CAD_Parts (MIT): micro servo (1143), half-size breadboard (64). Converted with tools/cad (colours, units).
+  tools/cad          - occt-import-js 0.0.23 (LGPL-2.1) on Open CASCADE Technology (LGPL-2.1): an offline development tool, NOT part of the Lens.

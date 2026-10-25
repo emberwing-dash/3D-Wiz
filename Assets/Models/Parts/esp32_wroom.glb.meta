@@ -1,0 +1,143 @@
+- !<AssetImportMetadata/0ccce625-acc5-4877-a95e-f779597cace1>
+  ImportedAssetIds:
+    .hidden/cad_0: !<reference> 37044f4f-2571-4a50-b01c-22e7c9c5b497
+    0d104478080ee8b3: !<reference> efea8d12-be4f-46db-9a33-78fda75ea413
+    13895ad8e6110616: !<reference> 19d35954-a398-4fc4-bc80-135acfc462dc
+    26ba073d67b9d0dd: !<reference> 6d101e1b-e189-40fb-b6e3-ee8af8ded9e3
+    38e3d2366be5b117: !<reference> fb8a1a26-ab40-4862-afe6-bb8cc0508801
+    3a68ccec696bc4f1: !<reference> e63261d7-651c-4a25-8114-8d48be4b6651
+    6c170461f77dae9e: !<reference> 8383691c-bd9d-4a28-b87c-f455682f6203
+    88ab437fd121cc69: !<reference> 9edb2bd9-7168-4cef-8a9e-10a7c53b4aca
+    8c2c6f3cf8d060fd: !<reference> e8359e82-a322-442a-a437-dca01e6650b5
+    9306e6f0db1c92b4: !<reference> 8878a3c9-0e08-403c-a0d7-90549c68795b
+    99982a21fe277f2e: !<reference> f7c08606-5617-4419-b9c0-5940d9ee6ecb
+    Materials/cad_0: !<reference> 2e26e0b1-6019-443c-a22e-44708b6cafc9
+    Materials/cad_0|cad_0|GraphPassInfo: !<reference> 7ab83da7-8c3d-4579-a211-494af25cd4e2
+    Materials/cad_1: !<reference> cca67c16-c94f-4791-bc33-eb2be820d8cf
+    Materials/cad_1|cad_1|GraphPassInfo: !<reference> 873ebf4f-a667-420e-a12d-a8b0cd1de285
+    Materials/cad_2: !<reference> d1d525b8-7aef-4c93-b2d7-991bf85cb095
+    Materials/cad_2|cad_2|GraphPassInfo: !<reference> e981f151-8781-4442-8627-6612dbbb99bb
+    Materials/cad_3: !<reference> 8be80795-59d3-4cd0-b5d5-07e1e0d0ed59
+    Materials/cad_3|cad_3|GraphPassInfo: !<reference> e887e63d-db65-4eb1-b6c7-e4aa34cabbf6
+    Meshes/ESP32-WROOM-32_c0: !<reference> 90e18e64-5a31-45f7-b1ee-17c399f9b823
+    Meshes/ESP32-WROOM-32_c1: !<reference> 04b0fac9-1297-4366-8e7d-37d9b2cfa805
+    Meshes/ESP32-WROOM-32_c2: !<reference> f2052940-877e-402e-a945-a383c67de3b3
+    Meshes/ESP32-WROOM-32_c3: !<reference> 4dbebc24-8482-4c95-9fa8-1a9ed806c10b
+    Scene: !<reference> c20a315d-c755-4287-acbd-9a2355ed7c16
+    a288bcef99afbd04: !<reference> d0aaaeda-c4b1-41b6-af4b-f59a07e75d91
+  ImporterName: GltfImporter
+  PrimaryAsset: !<reference> c20a315d-c755-4287-acbd-9a2355ed7c16
+  PackageType: LegacyPackage
+  LegacyPackagePolicy: CanBeUnpackedTransparent
+  ExtraData:
+    {}
+  AssetDataMap:
+    Scene: !<own> c72715fd-cd5c-4e00-bb4b-ddc9943fefda
+  DependentFiles:
+    []
+  ImporterSettings: !<GltfImporterSettings>
+    UseLegacyImporter: false
+    WithMaterials: true
+    NamingConvention: ByCategorySanitizeV2
+    PersistentIdGenerationAlgorithm: DescriptorBasedV2
+    AnimationCurveOptimization: true
+    CustomAnimationSamplingRate: 30.000000
+    ImportVertexColor: true
+    ImportTangents: true
+    ImportMorphTargetAnimation: true
+    ConvertMetersToCentimeters: true
+    RegenerateTangents: false
+    OptimizeMesh: true
+  CompressionSettings: !<ComplexCompressionSettings>
+    Presets:
+      None Compression: !<FileCompressionSettings>
+        {}
+    ExtensionMappings:
+      mesh: None Compression
+    Overrides:
+      {}
+- !<SceneObject/6d101e1b-e189-40fb-491c-11750721261c>
+  PrefabRemaps:
+    []
+  Name: esp32_wroom
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 100.000000, y: 100.000000, z: 100.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 9edb2bd9-7168-4cef-7561-ef583ac4b535
+  Components:
+    []
+- !<SceneObject/77518dc0-40da-43c0-76d2-d72d768bfe2c>
+  PrefabRemaps:
+    []
+  Name: ESP32-WROOM-32
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 832f58e3-4e80-4ff1-5d3d-eb13a87cee6a
+- !<RenderMeshVisual/832f58e3-4e80-4ff1-5d3d-eb13a87cee6a>
+  PrefabRemaps:
+    []
+  Name: ESP32-WROOM-32
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 2e26e0b1-6019-443c-a22e-44708b6cafc9
+  Mesh: !<reference> 3ef8b165-e7df-4283-9769-d48546d57997
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/9edb2bd9-7168-4cef-7561-ef583ac4b535>
+  PrefabRemaps:
+    []
+  Name: Scenes
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> e8359e82-a322-442a-5bc8-235fe199af4a
+  Components:
+    []
+- !<ObjectPrefabAssetData/c72715fd-cd5c-4e00-bb4b-ddc9943fefda>
+  Prototype: !<ObjectOwner/d87f6aeb-b07e-4bf4-a9d4-eb8f98e020eb>
+    PackagePath: ""
+    objects:
+      - !<own> 6d101e1b-e189-40fb-491c-11750721261c
+- !<SceneObject/e8359e82-a322-442a-5bc8-235fe199af4a>
+  PrefabRemaps:
+    []
+  Name: Scene0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 77518dc0-40da-43c0-76d2-d72d768bfe2c
+  Components:
+    []

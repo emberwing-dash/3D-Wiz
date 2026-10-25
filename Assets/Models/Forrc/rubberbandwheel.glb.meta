@@ -1,0 +1,128 @@
+- !<AssetImportMetadata/006af539-eaec-4e3b-a24e-e49ed883ffdd>
+  ImportedAssetIds:
+    .hidden/cad_0: !<reference> 30defd9a-2644-4f9f-a9f9-fb860165d20e
+    1ed0d57cea0a13f9: !<reference> cda8c1db-76b5-45e0-97b7-b294b56dd0ec
+    26ba073d67b9d0dd: !<reference> 84137306-f10c-4980-ba65-ecdca6461a70
+    88ab437fd121cc69: !<reference> 2e70677c-62c1-40fc-bb2a-05f459fcfaa5
+    8c2c6f3cf8d060fd: !<reference> abb78f04-5ca5-434d-bdf1-039fa7b577e8
+    9780a2f8f38d0e18: !<reference> 1a7b1361-7e8c-4058-9137-7d194598986d
+    Materials/cad_0: !<reference> 211d8f95-214d-4d22-9e21-5ccdf1b7ef88
+    Materials/cad_0|cad_0|GraphPassInfo: !<reference> 50490726-2562-4166-a84a-28946290bb4b
+    Meshes/rubberbandwheel: !<reference> 76e7443a-f417-4057-8420-3920e382b056
+    Scene: !<reference> 38af22cf-f373-4906-b4cd-7928738ad0c0
+  ImporterName: GltfImporter
+  PrimaryAsset: !<reference> 38af22cf-f373-4906-b4cd-7928738ad0c0
+  PackageType: LegacyPackage
+  LegacyPackagePolicy: CanBeUnpackedTransparent
+  ExtraData:
+    {}
+  AssetDataMap:
+    Scene: !<own> dd3e3ff2-9fab-4482-8ff8-fcd5cf9fb093
+  DependentFiles:
+    []
+  ImporterSettings: !<GltfImporterSettings>
+    UseLegacyImporter: false
+    WithMaterials: true
+    NamingConvention: ByCategorySanitizeV2
+    PersistentIdGenerationAlgorithm: DescriptorBasedV2
+    AnimationCurveOptimization: true
+    CustomAnimationSamplingRate: 30.000000
+    ImportVertexColor: true
+    ImportTangents: true
+    ImportMorphTargetAnimation: true
+    ConvertMetersToCentimeters: true
+    RegenerateTangents: false
+    OptimizeMesh: true
+  CompressionSettings: !<ComplexCompressionSettings>
+    Presets:
+      None Compression: !<FileCompressionSettings>
+        {}
+    ExtensionMappings:
+      mesh: None Compression
+    Overrides:
+      {}
+- !<RenderMeshVisual/1a7b1361-7e8c-4058-6ec8-82e6ba676792>
+  PrefabRemaps:
+    []
+  Name: rubberbandwheel
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 211d8f95-214d-4d22-9e21-5ccdf1b7ef88
+  Mesh: !<reference> 76e7443a-f417-4057-8420-3920e382b056
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/2e70677c-62c1-40fc-44d5-fa0ba603055a>
+  PrefabRemaps:
+    []
+  Name: Scenes
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> abb78f04-5ca5-434d-420e-fc60584a8817
+  Components:
+    []
+- !<SceneObject/84137306-f10c-4980-459a-132359b9e58f>
+  PrefabRemaps:
+    []
+  Name: rubberbandwheel
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 100.000000, y: 100.000000, z: 100.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 2e70677c-62c1-40fc-44d5-fa0ba603055a
+  Components:
+    []
+- !<SceneObject/abb78f04-5ca5-434d-420e-fc60584a8817>
+  PrefabRemaps:
+    []
+  Name: Scene0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> cda8c1db-76b5-45e0-6848-4d6b4a922f13
+  Components:
+    []
+- !<SceneObject/cda8c1db-76b5-45e0-6848-4d6b4a922f13>
+  PrefabRemaps:
+    []
+  Name: rubberbandwheel
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 1a7b1361-7e8c-4058-6ec8-82e6ba676792
+- !<ObjectPrefabAssetData/dd3e3ff2-9fab-4482-8ff8-fcd5cf9fb093>
+  Prototype: !<ObjectOwner/a9ba5bfc-ab9d-47b0-9309-255938cf23f3>
+    PackagePath: ""
+    objects:
+      - !<own> 84137306-f10c-4980-459a-132359b9e58f

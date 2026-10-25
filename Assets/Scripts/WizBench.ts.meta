@@ -1,0 +1,77 @@
+- !<AssetImportMetadata/9f8e7dfe-b349-4bb5-b891-99ac010c42c0>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 86b5c799-712b-442c-a276-f4c0278c119d
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 86b5c799-712b-442c-a276-f4c0278c119d
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 09cab1cf-fa39-4709-aba3-3252698e3213
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/09cab1cf-fa39-4709-aba3-3252698e3213>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: a256d516-0eda-4df7-95b6-95e80175132b
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    boxMesh: false
+    cylinderMesh: false
+    debugLog: false
+    dragDegPerCm: false
+    labelSize: false
+    litMaterial: false
+    sphereMesh: false
+    unlitMaterial: false
+    wireThicknessCm: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - boxMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+      sphereMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+      cylinderMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+      litMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      unlitMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      wireThicknessCm: 0.090000
+      labelSize: !<float> 13.000000
+      dragDegPerCm: !<float> 10.000000
+      debugLog: false
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"label", "label":"<span style=\"color: #60A5FA;\">WizBench - Tinkercad-style circuit bench</span>"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"References"}'
+    - '// @input Asset.RenderMesh boxMesh {"hint":"Unit cube mesh (1 cm)"}'
+    - '// @input Asset.RenderMesh sphereMesh {"hint":"Unit sphere mesh (1 cm)"}'
+    - '// @input Asset.RenderMesh cylinderMesh {"hint":"Unit cylinder mesh (1 cm)"}'
+    - '// @input Asset.Material litMaterial {"hint":"Lit glTF material"}'
+    - '// @input Asset.Material unlitMaterial {"hint":"Unlit material (wires, pin dots)"}'
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"Settings"}'
+    - '// @input float wireThicknessCm = 0.11 {"hint":"Wire radius in bench cm (bench is drawn about 2x real size)", "widget":"slider", "min":0.04, "max":0.2, "step":0.01}'
+    - '// @input float labelSize = 16 {"hint":"Pin label font size", "widget":"slider", "min":8, "max":24, "step":1}'
+    - '// @input float dragDegPerCm = 10 {"hint":"Degrees of board rotation per cm of drag", "widget":"slider", "min":2, "max":14, "step":0.5}'
+    - '// @input bool debugLog {"hint":"Log interaction events (debug)"}'
+    - '// @ui {"widget":"group_end"}'

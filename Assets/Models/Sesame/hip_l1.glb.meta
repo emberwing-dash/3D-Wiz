@@ -1,0 +1,128 @@
+- !<AssetImportMetadata/e0a740a6-7260-4669-ba0b-86cb12a34bb2>
+  ImportedAssetIds:
+    .hidden/hip_l1: !<reference> 323149b8-e43f-4a60-b7f9-2cadc1e23739
+    26ba073d67b9d0dd: !<reference> 4ff4062a-5796-4623-8cb5-8a7e32aebd70
+    88ab437fd121cc69: !<reference> 3970b125-79d2-40a0-b6bd-76f69b5d6f12
+    8c2c6f3cf8d060fd: !<reference> 1b09ed64-273b-4690-a02c-c17343e44bed
+    Materials/hip_l1: !<reference> 466e5d27-5bf4-4293-9fdd-54195f592891
+    Materials/hip_l1|hip_l1|GraphPassInfo: !<reference> 2f0ed94c-25aa-457a-998e-6e729dba6b6e
+    Meshes/geometry_0: !<reference> fa224ad5-9f24-41e4-bb89-b1bcca4f8f07
+    Scene: !<reference> 4211d22a-1d6c-4a39-a971-53075b45c31c
+    d596665d1a4bffd1: !<reference> 8def933a-2658-464f-a355-f6e58b4c8130
+    ed3acca98b96b0a1: !<reference> c45c9638-f32a-4d28-b7c2-0711271922cf
+  ImporterName: GltfImporter
+  PrimaryAsset: !<reference> 4211d22a-1d6c-4a39-a971-53075b45c31c
+  PackageType: LegacyPackage
+  LegacyPackagePolicy: CanBeUnpackedTransparent
+  ExtraData:
+    {}
+  AssetDataMap:
+    Scene: !<own> 413d6cab-6206-450a-a181-4e2bb3ca72a2
+  DependentFiles:
+    []
+  ImporterSettings: !<GltfImporterSettings>
+    UseLegacyImporter: false
+    WithMaterials: true
+    NamingConvention: ByCategorySanitizeV2
+    PersistentIdGenerationAlgorithm: DescriptorBasedV2
+    AnimationCurveOptimization: true
+    CustomAnimationSamplingRate: 30.000000
+    ImportVertexColor: true
+    ImportTangents: true
+    ImportMorphTargetAnimation: true
+    ConvertMetersToCentimeters: true
+    RegenerateTangents: false
+    OptimizeMesh: true
+  CompressionSettings: !<ComplexCompressionSettings>
+    Presets:
+      None Compression: !<FileCompressionSettings>
+        {}
+    ExtensionMappings:
+      mesh: None Compression
+    Overrides:
+      {}
+- !<SceneObject/1b09ed64-273b-4690-5fd3-3e8cbc1bb412>
+  PrefabRemaps:
+    []
+  Name: Scene0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> c45c9638-f32a-4d28-483d-f8eed8e6dd30
+  Components:
+    []
+- !<SceneObject/3970b125-79d2-40a0-4942-890964a290ed>
+  PrefabRemaps:
+    []
+  Name: Scenes
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 1b09ed64-273b-4690-5fd3-3e8cbc1bb412
+  Components:
+    []
+- !<ObjectPrefabAssetData/413d6cab-6206-450a-a181-4e2bb3ca72a2>
+  Prototype: !<ObjectOwner/9ab2a484-df42-439f-8e52-d1cbfe468448>
+    PackagePath: ""
+    objects:
+      - !<own> 4ff4062a-5796-4623-734a-7581cd51428f
+- !<SceneObject/4ff4062a-5796-4623-734a-7581cd51428f>
+  PrefabRemaps:
+    []
+  Name: hip_l1
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 100.000000, y: 100.000000, z: 100.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 3970b125-79d2-40a0-4942-890964a290ed
+  Components:
+    []
+- !<RenderMeshVisual/8def933a-2658-464f-5caa-091a74b37ecf>
+  PrefabRemaps:
+    []
+  Name: geometry_0
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 466e5d27-5bf4-4293-9fdd-54195f592891
+  Mesh: !<reference> fa224ad5-9f24-41e4-bb89-b1bcca4f8f07
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/c45c9638-f32a-4d28-483d-f8eed8e6dd30>
+  PrefabRemaps:
+    []
+  Name: geometry_0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 8def933a-2658-464f-5caa-091a74b37ecf

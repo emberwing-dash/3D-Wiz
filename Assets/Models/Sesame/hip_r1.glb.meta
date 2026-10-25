@@ -1,0 +1,128 @@
+- !<AssetImportMetadata/5e580cbd-bb95-4951-97b1-0f988190bbac>
+  ImportedAssetIds:
+    .hidden/hip_r1: !<reference> a5fa1b9d-9569-44ff-9fbb-4b70faf89540
+    26ba073d67b9d0dd: !<reference> 1d5b20f7-47b9-4fe0-aee4-f021fcbefc77
+    88ab437fd121cc69: !<reference> 78993ea2-0139-411a-8c9e-8466fc95dbb7
+    8c2c6f3cf8d060fd: !<reference> 984c3e36-a351-4087-bcc9-cb7a4e4e42eb
+    Materials/hip_r1: !<reference> c3d6088b-4c41-400f-a0df-228030d99774
+    Materials/hip_r1|hip_r1|GraphPassInfo: !<reference> 3513f312-297f-44d5-89be-d058cfb763b9
+    Meshes/geometry_0: !<reference> e31a5a8d-e609-4c48-819b-9cd8764bf493
+    Scene: !<reference> 1b7640ea-ab59-43ad-8620-85c39ccd1b2a
+    d596665d1a4bffd1: !<reference> a38dc222-73f3-4a88-9f4b-bf098736af12
+    ed3acca98b96b0a1: !<reference> 113674d9-1809-4990-b652-45cfd51c1971
+  ImporterName: GltfImporter
+  PrimaryAsset: !<reference> 1b7640ea-ab59-43ad-8620-85c39ccd1b2a
+  PackageType: LegacyPackage
+  LegacyPackagePolicy: CanBeUnpackedTransparent
+  ExtraData:
+    {}
+  AssetDataMap:
+    Scene: !<own> c033f3b3-fc8d-4cc3-a699-dd60eaf32d5c
+  DependentFiles:
+    []
+  ImporterSettings: !<GltfImporterSettings>
+    UseLegacyImporter: false
+    WithMaterials: true
+    NamingConvention: ByCategorySanitizeV2
+    PersistentIdGenerationAlgorithm: DescriptorBasedV2
+    AnimationCurveOptimization: true
+    CustomAnimationSamplingRate: 30.000000
+    ImportVertexColor: true
+    ImportTangents: true
+    ImportMorphTargetAnimation: true
+    ConvertMetersToCentimeters: true
+    RegenerateTangents: false
+    OptimizeMesh: true
+  CompressionSettings: !<ComplexCompressionSettings>
+    Presets:
+      None Compression: !<FileCompressionSettings>
+        {}
+    ExtensionMappings:
+      mesh: None Compression
+    Overrides:
+      {}
+- !<SceneObject/113674d9-1809-4990-49ad-ba302ae3e68e>
+  PrefabRemaps:
+    []
+  Name: geometry_0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> a38dc222-73f3-4a88-60b4-40f678c950ed
+- !<SceneObject/1d5b20f7-47b9-4fe0-511b-0fde03410388>
+  PrefabRemaps:
+    []
+  Name: hip_r1
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 100.000000, y: 100.000000, z: 100.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 78993ea2-0139-411a-7361-7b99036a2448
+  Components:
+    []
+- !<SceneObject/78993ea2-0139-411a-7361-7b99036a2448>
+  PrefabRemaps:
+    []
+  Name: Scenes
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 984c3e36-a351-4087-4336-3485b1b1bd14
+  Components:
+    []
+- !<SceneObject/984c3e36-a351-4087-4336-3485b1b1bd14>
+  PrefabRemaps:
+    []
+  Name: Scene0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 113674d9-1809-4990-49ad-ba302ae3e68e
+  Components:
+    []
+- !<RenderMeshVisual/a38dc222-73f3-4a88-60b4-40f678c950ed>
+  PrefabRemaps:
+    []
+  Name: geometry_0
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> c3d6088b-4c41-400f-a0df-228030d99774
+  Mesh: !<reference> e31a5a8d-e609-4c48-819b-9cd8764bf493
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<ObjectPrefabAssetData/c033f3b3-fc8d-4cc3-a699-dd60eaf32d5c>
+  Prototype: !<ObjectOwner/a8c05749-ee2f-496f-94db-ac7d464da644>
+    PackagePath: ""
+    objects:
+      - !<own> 1d5b20f7-47b9-4fe0-511b-0fde03410388

@@ -1,0 +1,128 @@
+- !<AssetImportMetadata/5735ed99-e351-4115-ae23-faf733caf012>
+  ImportedAssetIds:
+    .hidden/cad_0: !<reference> 7046a1a9-7487-4813-9814-0431027ac107
+    26ba073d67b9d0dd: !<reference> cafca62b-9920-4eff-a07d-a02351393b49
+    88ab437fd121cc69: !<reference> da232df3-5992-4fa1-b86c-4fb72e77a77e
+    8c2c6f3cf8d060fd: !<reference> 8f2ac5a4-bb70-4e9c-9b65-d81a133982c4
+    8d18a839eda554dd: !<reference> d1e7ddbd-1b51-4ade-a5bc-65641f3f8888
+    Materials/cad_0: !<reference> 255b1d50-dd03-45a6-8263-8a4945ce8cd9
+    Materials/cad_0|cad_0|GraphPassInfo: !<reference> ca318c9f-78fe-41b0-b741-ca9aa1227348
+    Meshes/drivegear: !<reference> 2698fdfb-8b6c-4ad8-acdc-66d6a8e53249
+    Scene: !<reference> 54e87c36-f576-4de8-afd9-36f3f9e780aa
+    de3ef03dc4a98e34: !<reference> 39eeaca5-bd04-4aba-962c-35c95f3973a8
+  ImporterName: GltfImporter
+  PrimaryAsset: !<reference> 54e87c36-f576-4de8-afd9-36f3f9e780aa
+  PackageType: LegacyPackage
+  LegacyPackagePolicy: CanBeUnpackedTransparent
+  ExtraData:
+    {}
+  AssetDataMap:
+    Scene: !<own> eee6e845-23f4-405d-8e84-21fa2b46958c
+  DependentFiles:
+    []
+  ImporterSettings: !<GltfImporterSettings>
+    UseLegacyImporter: false
+    WithMaterials: true
+    NamingConvention: ByCategorySanitizeV2
+    PersistentIdGenerationAlgorithm: DescriptorBasedV2
+    AnimationCurveOptimization: true
+    CustomAnimationSamplingRate: 30.000000
+    ImportVertexColor: true
+    ImportTangents: true
+    ImportMorphTargetAnimation: true
+    ConvertMetersToCentimeters: true
+    RegenerateTangents: false
+    OptimizeMesh: true
+  CompressionSettings: !<ComplexCompressionSettings>
+    Presets:
+      None Compression: !<FileCompressionSettings>
+        {}
+    ExtensionMappings:
+      mesh: None Compression
+    Overrides:
+      {}
+- !<RenderMeshVisual/39eeaca5-bd04-4aba-69d3-ca36a0c68c57>
+  PrefabRemaps:
+    []
+  Name: drivegear
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 255b1d50-dd03-45a6-8263-8a4945ce8cd9
+  Mesh: !<reference> 2698fdfb-8b6c-4ad8-acdc-66d6a8e53249
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/8f2ac5a4-bb70-4e9c-649a-27e5ecc67d3b>
+  PrefabRemaps:
+    []
+  Name: Scene0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> d1e7ddbd-1b51-4ade-5a43-9a9be0c07777
+  Components:
+    []
+- !<SceneObject/cafca62b-9920-4eff-5f82-5fdcaec6c4b6>
+  PrefabRemaps:
+    []
+  Name: drivegear
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 100.000000, y: 100.000000, z: 100.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> da232df3-5992-4fa1-4793-b048d1885881
+  Components:
+    []
+- !<SceneObject/d1e7ddbd-1b51-4ade-5a43-9a9be0c07777>
+  PrefabRemaps:
+    []
+  Name: drivegear
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 39eeaca5-bd04-4aba-69d3-ca36a0c68c57
+- !<SceneObject/da232df3-5992-4fa1-4793-b048d1885881>
+  PrefabRemaps:
+    []
+  Name: Scenes
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 8f2ac5a4-bb70-4e9c-649a-27e5ecc67d3b
+  Components:
+    []
+- !<ObjectPrefabAssetData/eee6e845-23f4-405d-8e84-21fa2b46958c>
+  Prototype: !<ObjectOwner/6b6039c9-32c4-4283-9a5b-c0f5d0eaf0d9>
+    PackagePath: ""
+    objects:
+      - !<own> cafca62b-9920-4eff-5f82-5fdcaec6c4b6

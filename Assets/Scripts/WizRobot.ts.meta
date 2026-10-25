@@ -1,0 +1,77 @@
+- !<AssetImportMetadata/7aaafa6c-e187-4158-b550-bd6622bb85b5>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 75708730-ac88-4615-97f1-66d644a8c6bb
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 75708730-ac88-4615-97f1-66d644a8c6bb
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 761a8eab-8654-401b-8dca-65033dfd6b48
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/761a8eab-8654-401b-8dca-65033dfd6b48>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: 95bcf2eb-d934-4ae4-a0b0-c5f1c60d662a
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    boxMesh: false
+    cylinderMesh: false
+    debugLog: false
+    dragDegPerCm: false
+    faceMaterial: false
+    litMaterial: false
+    sphereMesh: false
+    unlitMaterial: false
+    userModel: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - boxMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+      sphereMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+      cylinderMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+      litMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      unlitMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      faceMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      userModel: !<reference.ObjectPrefab> 00000000-0000-0000-0000-000000000000
+      dragDegPerCm: !<float> 14.000000
+      debugLog: false
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"label", "label":"<span style=\"color: #60A5FA;\">WizRobot - Sesame quadruped (real parts, AR desk view)</span>"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"References"}'
+    - '// @input Asset.RenderMesh boxMesh {"hint":"Unit cube mesh (1 cm)"}'
+    - '// @input Asset.RenderMesh sphereMesh {"hint":"Unit sphere mesh (1 cm)"}'
+    - '// @input Asset.RenderMesh cylinderMesh {"hint":"Unit cylinder mesh (1 cm)"}'
+    - '// @input Asset.Material litMaterial {"hint":"Lit glTF material (cloned per shape for electronics)"}'
+    - '// @input Asset.Material unlitMaterial {"hint":"Unlit material (desk grid, dimension lines)"}'
+    - '// @input Asset.Material faceMaterial {"hint":"Unlit material with Base Texture enabled (OLED screen)"}'
+    - '// @input Asset.ObjectPrefab userModel {"hint":"Optional: YOUR model (imported FBX/GLB prefab, see tools/import-model.md). Shown on the desk in the My Model project."}'
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"Settings"}'
+    - '// @input float dragDegPerCm = 14 {"hint":"Degrees of yaw per cm of drag", "widget":"slider", "min":2, "max":14, "step":0.5}'
+    - '// @input bool debugLog {"hint":"Log interaction events (debug)"}'
+    - '// @ui {"widget":"group_end"}'

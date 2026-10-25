@@ -1,0 +1,128 @@
+- !<AssetImportMetadata/431cc67e-cee8-46ae-afc8-2bcc38effa7e>
+  ImportedAssetIds:
+    .hidden/cad_0: !<reference> 65522134-5dcb-4289-a2d8-389056121395
+    1bcc9609eeeb7cea: !<reference> 91229890-8dea-45c5-b556-a5cc4ffb8548
+    26ba073d67b9d0dd: !<reference> 781f3c85-92ed-4607-b993-dfbc39f100f7
+    7620b2bfab4be4fd: !<reference> db1a9764-1f43-4a52-97c4-6fa66e994580
+    88ab437fd121cc69: !<reference> 31d3042a-6b8c-4637-8ef4-eda7ea38befe
+    8c2c6f3cf8d060fd: !<reference> db06aac4-49f2-4da6-b9ca-a58781a56f28
+    Materials/cad_0: !<reference> fc6e17a4-5450-4c54-9c7a-16796469e181
+    Materials/cad_0|cad_0|GraphPassInfo: !<reference> 4ffb8818-b9f1-474a-b04f-314846352f1d
+    Meshes/electronicsriser: !<reference> f52b336c-3c38-46ee-b9ac-f7dfbdd2010b
+    Scene: !<reference> 175d048c-f07c-4140-818d-7feb5b0b2cfc
+  ImporterName: GltfImporter
+  PrimaryAsset: !<reference> 175d048c-f07c-4140-818d-7feb5b0b2cfc
+  PackageType: LegacyPackage
+  LegacyPackagePolicy: CanBeUnpackedTransparent
+  ExtraData:
+    {}
+  AssetDataMap:
+    Scene: !<own> 025ca5a6-f95b-410d-9205-ac6cd516c717
+  DependentFiles:
+    []
+  ImporterSettings: !<GltfImporterSettings>
+    UseLegacyImporter: false
+    WithMaterials: true
+    NamingConvention: ByCategorySanitizeV2
+    PersistentIdGenerationAlgorithm: DescriptorBasedV2
+    AnimationCurveOptimization: true
+    CustomAnimationSamplingRate: 30.000000
+    ImportVertexColor: true
+    ImportTangents: true
+    ImportMorphTargetAnimation: true
+    ConvertMetersToCentimeters: true
+    RegenerateTangents: false
+    OptimizeMesh: true
+  CompressionSettings: !<ComplexCompressionSettings>
+    Presets:
+      None Compression: !<FileCompressionSettings>
+        {}
+    ExtensionMappings:
+      mesh: None Compression
+    Overrides:
+      {}
+- !<ObjectPrefabAssetData/025ca5a6-f95b-410d-9205-ac6cd516c717>
+  Prototype: !<ObjectOwner/76cfbefc-9bba-4819-a6ad-bbf38081e0d3>
+    PackagePath: ""
+    objects:
+      - !<own> 781f3c85-92ed-4607-466c-2043c60eff08
+- !<SceneObject/31d3042a-6b8c-4637-710b-125815c74101>
+  PrefabRemaps:
+    []
+  Name: Scenes
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> db06aac4-49f2-4da6-4635-5a787e5a90d7
+  Components:
+    []
+- !<SceneObject/781f3c85-92ed-4607-466c-2043c60eff08>
+  PrefabRemaps:
+    []
+  Name: electronicsriser
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 100.000000, y: 100.000000, z: 100.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 31d3042a-6b8c-4637-710b-125815c74101
+  Components:
+    []
+- !<RenderMeshVisual/91229890-8dea-45c5-4aa9-5a33b0047ab7>
+  PrefabRemaps:
+    []
+  Name: electronicsriser
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> fc6e17a4-5450-4c54-9c7a-16796469e181
+  Mesh: !<reference> f52b336c-3c38-46ee-b9ac-f7dfbdd2010b
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/db06aac4-49f2-4da6-4635-5a787e5a90d7>
+  PrefabRemaps:
+    []
+  Name: Scene0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> db1a9764-1f43-4a52-683b-90599166ba7f
+  Components:
+    []
+- !<SceneObject/db1a9764-1f43-4a52-683b-90599166ba7f>
+  PrefabRemaps:
+    []
+  Name: electronicsriser
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 91229890-8dea-45c5-4aa9-5a33b0047ab7

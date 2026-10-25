@@ -1,0 +1,133 @@
+- !<AssetImportMetadata/596a203f-f39b-415e-bee0-3fd3c2a64332>
+  ImportedAssetIds:
+    .hidden/cad_0: !<reference> 7ef5019f-2d5b-4adc-8e67-817e5878aa7a
+    26ba073d67b9d0dd: !<reference> aa0e624b-1a18-4ff5-8c5d-514b8d3a8875
+    7b92ab79c43861cf: !<reference> 95f5a989-9d6d-477a-a12f-91d411ae7c24
+    837b2fd0eda6b7db: !<reference> e4810fce-98fd-447f-8b5f-d588c562e254
+    88ab437fd121cc69: !<reference> a2db0b33-384e-46f2-89ba-3db65e38e59a
+    8c2c6f3cf8d060fd: !<reference> f5b185cf-8499-4cc4-8d9d-2a09c2763f16
+    Materials/cad_0: !<reference> e034d78f-dd38-49fe-8f21-521eef7e9cf0
+    Materials/cad_0|cad_0|GraphPassInfo: !<reference> cca664bb-2c4d-48ad-8d03-6bb7cb291c0a
+    Materials/cad_1: !<reference> bd6b2cfc-0f19-4b03-b46c-5e331e63b517
+    Materials/cad_1|cad_1|GraphPassInfo: !<reference> afe15264-1497-4e75-899b-0758b5033a73
+    Meshes/R_Axial_DIN0207_L63mm_D25mm_P1016mm_Horizontal_c0: !<reference> 6c4386d8-b706-4f39-b7dc-67c3b4caef21
+    Meshes/R_Axial_DIN0207_L63mm_D25mm_P1016mm_Horizontal_c1: !<reference> f3189452-4590-4ef3-8acf-d0fdf6b2096e
+    Scene: !<reference> c60adc97-c49f-46f3-aa56-7f4b7e8652dd
+    a3d425eb28518262: !<reference> 80aa551d-87f5-4366-8342-8d82c401707c
+    beba1b467d8f9b18: !<reference> 230011e0-9e96-4469-bc7e-fc9b5465a123
+  ImporterName: GltfImporter
+  PrimaryAsset: !<reference> c60adc97-c49f-46f3-aa56-7f4b7e8652dd
+  PackageType: LegacyPackage
+  LegacyPackagePolicy: CanBeUnpackedTransparent
+  ExtraData:
+    {}
+  AssetDataMap:
+    Scene: !<own> 508baeb6-e5aa-4752-8229-61a849af8315
+  DependentFiles:
+    []
+  ImporterSettings: !<GltfImporterSettings>
+    UseLegacyImporter: false
+    WithMaterials: true
+    NamingConvention: ByCategorySanitizeV2
+    PersistentIdGenerationAlgorithm: DescriptorBasedV2
+    AnimationCurveOptimization: true
+    CustomAnimationSamplingRate: 30.000000
+    ImportVertexColor: true
+    ImportTangents: true
+    ImportMorphTargetAnimation: true
+    ConvertMetersToCentimeters: true
+    RegenerateTangents: false
+    OptimizeMesh: true
+  CompressionSettings: !<ComplexCompressionSettings>
+    Presets:
+      None Compression: !<FileCompressionSettings>
+        {}
+    ExtensionMappings:
+      mesh: None Compression
+    Overrides:
+      {}
+- !<SceneObject/449a8963-e139-4423-616c-bec1d6bc9bfc>
+  PrefabRemaps:
+    []
+  Name: R_Axial_DIN0207_L63mm_D25mm_P1016mm_Horizontal
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> e1f5afe8-5570-4a01-711d-0c03102f4c8e
+- !<ObjectPrefabAssetData/508baeb6-e5aa-4752-8229-61a849af8315>
+  Prototype: !<ObjectOwner/c33606d8-55c4-41a7-bb75-48e3191c3b9a>
+    PackagePath: ""
+    objects:
+      - !<own> aa0e624b-1a18-4ff5-73a2-aeb472c5778a
+- !<SceneObject/a2db0b33-384e-46f2-7645-c249a1c71a65>
+  PrefabRemaps:
+    []
+  Name: Scenes
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> f5b185cf-8499-4cc4-7262-d5f63d89c0e9
+  Components:
+    []
+- !<SceneObject/aa0e624b-1a18-4ff5-73a2-aeb472c5778a>
+  PrefabRemaps:
+    []
+  Name: resistor_axial
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 100.000000, y: 100.000000, z: 100.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> a2db0b33-384e-46f2-7645-c249a1c71a65
+  Components:
+    []
+- !<RenderMeshVisual/e1f5afe8-5570-4a01-711d-0c03102f4c8e>
+  PrefabRemaps:
+    []
+  Name: R_Axial_DIN0207_L63mm_D25mm_P1016mm_Horizontal
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> e034d78f-dd38-49fe-8f21-521eef7e9cf0
+  Mesh: !<reference> ee941d82-7852-49f3-ae2c-abfbcfc00392
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/f5b185cf-8499-4cc4-7262-d5f63d89c0e9>
+  PrefabRemaps:
+    []
+  Name: Scene0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 449a8963-e139-4423-616c-bec1d6bc9bfc
+  Components:
+    []

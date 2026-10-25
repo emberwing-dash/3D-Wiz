@@ -1,0 +1,132 @@
+{
+ "led_5mm": {
+  "glb": "led_5mm.glb",
+  "source": "KiCad kicad-packages3D / LED_THT.3dshapes / LED_D5.0mm.step",
+  "url": "https://gitlab.com/kicad/libraries/kicad-packages3D/-/raw/master/LED_THT.3dshapes/LED_D5.0mm.step",
+  "license": "CC-BY-SA-4.0 (KiCad library exception)",
+  "sizeCm": [
+   0.54,
+   1.41,
+   0.58
+  ],
+  "triangles": 1891,
+  "parts": 2
+ },
+ "resistor_axial": {
+  "glb": "resistor_axial.glb",
+  "source": "KiCad kicad-packages3D / Resistor_THT.3dshapes / R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal.step",
+  "url": "https://gitlab.com/kicad/libraries/kicad-packages3D/-/raw/master/Resistor_THT.3dshapes/R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal.step",
+  "license": "CC-BY-SA-4.0 (KiCad library exception)",
+  "sizeCm": [
+   1.08,
+   0.55,
+   0.25
+  ],
+  "triangles": 5596,
+  "parts": 2
+ },
+ "diode_do41": {
+  "glb": "diode_do41.glb",
+  "source": "KiCad kicad-packages3D / Diode_THT.3dshapes / D_DO-41_SOD81_P10.16mm_Horizontal.step",
+  "url": "https://gitlab.com/kicad/libraries/kicad-packages3D/-/raw/master/Diode_THT.3dshapes/D_DO-41_SOD81_P10.16mm_Horizontal.step",
+  "license": "CC-BY-SA-4.0 (KiCad library exception)",
+  "sizeCm": [
+   1.1,
+   0.57,
+   0.27
+  ],
+  "triangles": 2900,
+  "parts": 3
+ },
+ "npn_to92": {
+  "glb": "npn_to92.glb",
+  "source": "KiCad kicad-packages3D / Package_TO_SOT_THT.3dshapes / TO-92_Inline.step",
+  "url": "https://gitlab.com/kicad/libraries/kicad-packages3D/-/raw/master/Package_TO_SOT_THT.3dshapes/TO-92_Inline.step",
+  "license": "CC-BY-SA-4.0 (KiCad library exception)",
+  "sizeCm": [
+   0.48,
+   0.98,
+   0.37
+  ],
+  "triangles": 220,
+  "parts": 2
+ },
+ "dip16": {
+  "glb": "dip16.glb",
+  "source": "KiCad kicad-packages3D / Package_DIP.3dshapes / DIP-16_W7.62mm.step",
+  "url": "https://gitlab.com/kicad/libraries/kicad-packages3D/-/raw/master/Package_DIP.3dshapes/DIP-16_W7.62mm.step",
+  "license": "CC-BY-SA-4.0 (KiCad library exception)",
+  "sizeCm": [
+   0.79,
+   0.7,
+   1.92
+  ],
+  "triangles": 2454,
+  "parts": 2
+ },
+ "push_button": {
+  "glb": "push_button.glb",
+  "source": "KiCad kicad-packages3D / Button_Switch_THT.3dshapes / SW_PUSH_6mm.step",
+  "url": "https://gitlab.com/kicad/libraries/kicad-packages3D/-/raw/master/Button_Switch_THT.3dshapes/SW_PUSH_6mm.step",
+  "license": "CC-BY-SA-4.0 (KiCad library exception)",
+  "sizeCm": [
+   0.72,
+   0.78,
+   0.6
+  ],
+  "triangles": 3380,
+  "parts": 2
+ },
+ "buzzer": {
+  "glb": "buzzer.glb",
+  "source": "KiCad kicad-packages3D / Buzzer_Beeper.3dshapes / Buzzer_12x9.5RM7.6.step",
+  "url": "https://gitlab.com/kicad/libraries/kicad-packages3D/-/raw/master/Buzzer_Beeper.3dshapes/Buzzer_12x9.5RM7.6.step",
+  "license": "CC-BY-SA-4.0 (KiCad library exception)",
+  "sizeCm": [
+   1.2,
+   1.25,
+   1.2
+  ],
+  "triangles": 6788,
+  "parts": 3
+ },
+ "esp32_wroom": {
+  "glb": "esp32_wroom.glb",
+  "source": "KiCad kicad-packages3D / RF_Module.3dshapes / ESP32-WROOM-32.step",
+  "url": "https://gitlab.com/kicad/libraries/kicad-packages3D/-/raw/master/RF_Module.3dshapes/ESP32-WROOM-32.step",
+  "license": "CC-BY-SA-4.0 (KiCad library exception)",
+  "sizeCm": [
+   1.8,
+   0.31,
+   2.55
+  ],
+  "triangles": 11316,
+  "parts": 4
+ },
+ "servo_micro": {
+  "glb": "servo_micro.glb",
+  "source": "Adafruit_CAD_Parts / 1143 Micro Servo - High Torque Metal Gear/1143 Micro Servo High Torque Metal Gear.step",
+  "url": "https://raw.githubusercontent.com/adafruit/Adafruit_CAD_Parts/main/1143%20Micro%20Servo%20-%20High%20Torque%20Metal%20Gear/1143%20Micro%20Servo%20High%20Torque%20Metal%20Gear.step",
+  "license": "MIT",
+  "sizeCm": [
+   1.2,
+   3.07,
+   3.13
+  ],
+  "triangles": 1936,
+  "parts": 6
+ },
+ "breadboard_half": {
+  "glb": "breadboard_half.glb",
+  "source": "Adafruit_CAD_Parts / 64 Halfsize Breadboard/64 Halfsize Breadboard.step",
+  "url": "https://raw.githubusercontent.com/adafruit/Adafruit_CAD_Parts/main/64%20Halfsize%20Breadboard/64%20Halfsize%20Breadboard.step",
+  "license": "MIT",
+  "sizeCm": [
+   8.5,
+   0.97,
+   5.5
+  ],
+  "triangles": 60,
+  "parts": 1
+ }
+}

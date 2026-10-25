@@ -1,0 +1,9 @@
+{
+  "name": "3dwiz-cad-convert",
+  "private": true,
+  "type": "module",
+  "description": "Offline CAD -> GLB converter for 3D Wiz My Model (dev tool, not part of the Lens)",
+  "dependencies": {
+    "occt-import-js": "0.0.23"
+  }
+}

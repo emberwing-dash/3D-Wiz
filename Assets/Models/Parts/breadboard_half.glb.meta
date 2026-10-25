@@ -1,0 +1,128 @@
+- !<AssetImportMetadata/0baed72f-c884-4efe-a497-4d00b900d70b>
+  ImportedAssetIds:
+    .hidden/cad_0: !<reference> 575e8ca0-4fd5-4d26-ac16-c2c178dd03a8
+    16b469b933dc595e: !<reference> e0814fdc-439d-4de8-9286-8512bd3b60dc
+    26ba073d67b9d0dd: !<reference> 989c3d7b-748f-48ae-a4ad-abe8c9bfb8bf
+    88ab437fd121cc69: !<reference> 8b75dfc4-94d5-46c2-8bd3-f5731243d7f7
+    8c2c6f3cf8d060fd: !<reference> 33650d97-77e2-4f87-ab71-7e8063f54c19
+    Materials/cad_0: !<reference> 0d04e209-d11f-41b8-8a70-5f90bbf137a4
+    Materials/cad_0|cad_0|GraphPassInfo: !<reference> d85411c1-09fb-42d5-9244-07d45a9f044d
+    Meshes/Halfsize breadboard v1: !<reference> f75b8497-8c0a-4d4a-8893-615fff97e817
+    Scene: !<reference> 2be83acf-07eb-4ae5-8f57-6c3a51d2dec0
+    df273f583092b46e: !<reference> 70d363d5-a9b9-433e-a3ea-b56e05aa73bd
+  ImporterName: GltfImporter
+  PrimaryAsset: !<reference> 2be83acf-07eb-4ae5-8f57-6c3a51d2dec0
+  PackageType: LegacyPackage
+  LegacyPackagePolicy: CanBeUnpackedTransparent
+  ExtraData:
+    {}
+  AssetDataMap:
+    Scene: !<own> 438307c9-024b-4a4a-910f-0acb2039749d
+  DependentFiles:
+    []
+  ImporterSettings: !<GltfImporterSettings>
+    UseLegacyImporter: false
+    WithMaterials: true
+    NamingConvention: ByCategorySanitizeV2
+    PersistentIdGenerationAlgorithm: DescriptorBasedV2
+    AnimationCurveOptimization: true
+    CustomAnimationSamplingRate: 30.000000
+    ImportVertexColor: true
+    ImportTangents: true
+    ImportMorphTargetAnimation: true
+    ConvertMetersToCentimeters: true
+    RegenerateTangents: false
+    OptimizeMesh: true
+  CompressionSettings: !<ComplexCompressionSettings>
+    Presets:
+      None Compression: !<FileCompressionSettings>
+        {}
+    ExtensionMappings:
+      mesh: None Compression
+    Overrides:
+      {}
+- !<SceneObject/33650d97-77e2-4f87-548e-817f9c0ab3e6>
+  PrefabRemaps:
+    []
+  Name: Scene0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> e0814fdc-439d-4de8-6d79-7aed42c49f23
+  Components:
+    []
+- !<ObjectPrefabAssetData/438307c9-024b-4a4a-910f-0acb2039749d>
+  Prototype: !<ObjectOwner/23393562-7136-413c-874b-9f0b3f18b200>
+    PackagePath: ""
+    objects:
+      - !<own> 989c3d7b-748f-48ae-5b52-541736404740
+- !<RenderMeshVisual/70d363d5-a9b9-433e-5c15-4a91fa558c42>
+  PrefabRemaps:
+    []
+  Name: Halfsize breadboard v1
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 0d04e209-d11f-41b8-8a70-5f90bbf137a4
+  Mesh: !<reference> f75b8497-8c0a-4d4a-8893-615fff97e817
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/8b75dfc4-94d5-46c2-742c-0a8cedbc2808>
+  PrefabRemaps:
+    []
+  Name: Scenes
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 33650d97-77e2-4f87-548e-817f9c0ab3e6
+  Components:
+    []
+- !<SceneObject/989c3d7b-748f-48ae-5b52-541736404740>
+  PrefabRemaps:
+    []
+  Name: breadboard_half
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 100.000000, y: 100.000000, z: 100.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 8b75dfc4-94d5-46c2-742c-0a8cedbc2808
+  Components:
+    []
+- !<SceneObject/e0814fdc-439d-4de8-6d79-7aed42c49f23>
+  PrefabRemaps:
+    []
+  Name: Halfsize breadboard v1
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 70d363d5-a9b9-433e-5c15-4a91fa558c42

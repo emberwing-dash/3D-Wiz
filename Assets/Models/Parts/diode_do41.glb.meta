@@ -1,0 +1,138 @@
+- !<AssetImportMetadata/b7b4c966-ace2-4bfe-bb92-a4c81caac8a8>
+  ImportedAssetIds:
+    .hidden/cad_0: !<reference> 6cae6a69-4c66-4906-ad07-d2737c6f673c
+    20f85f6fe9b157eb: !<reference> 5871aeb9-3f85-4866-bbbb-96cf77338928
+    26ba073d67b9d0dd: !<reference> 188db3e6-0eff-4973-841c-46ab0c52493b
+    32bae73bd3c6ef48: !<reference> f4648720-39cb-45e2-afa8-eda14ec9e369
+    35debd23f2f6d4f2: !<reference> e7fdb43e-500e-4816-82f2-b805e8dfa7f0
+    3e08045f4a4ea1ea: !<reference> 411dc535-0cb6-471b-93b1-2fcbed482cc0
+    59dea325842429c2: !<reference> 57d170db-f416-4227-9ee6-a31fb0339d1f
+    88ab437fd121cc69: !<reference> 8ee94f09-60ee-4739-9c29-ee4fff111b1e
+    8c2c6f3cf8d060fd: !<reference> 61541e97-128b-4023-90ca-82bf00c42c48
+    Materials/cad_0: !<reference> e4633846-cd14-457c-b3ba-e443eaf9ea9d
+    Materials/cad_0|cad_0|GraphPassInfo: !<reference> bcfdad56-0d8c-41ca-8b5a-f20d0263ea0f
+    Materials/cad_1: !<reference> 29c68b64-850f-4738-9e71-58c45da5a2cc
+    Materials/cad_1|cad_1|GraphPassInfo: !<reference> 98091aeb-eadc-492c-ac5d-b1a194f41c77
+    Materials/cad_2: !<reference> 2d5c6853-a3c1-4e6c-8b64-3810f86de210
+    Materials/cad_2|cad_2|GraphPassInfo: !<reference> eb519b0f-5e4c-43e2-bc80-c8da747ca7eb
+    Meshes/D_DO-41_SOD81_P10.16mm_Horizontal_c0: !<reference> 2a6ff25b-fdae-4e53-9de0-4da062d78886
+    Meshes/D_DO-41_SOD81_P10.16mm_Horizontal_c1: !<reference> 8c2b6186-246c-4667-908e-53cff261048e
+    Meshes/D_DO-41_SOD81_P10.16mm_Horizontal_c2: !<reference> c1c1c7a5-4091-4919-859f-3b69811bc417
+    Scene: !<reference> 332a6ca2-d1be-4284-8b86-684f8cf253e8
+    dc7e10fd215ceceb: !<reference> 28a900db-5f4c-4877-8e1f-abe6ca994f70
+  ImporterName: GltfImporter
+  PrimaryAsset: !<reference> 332a6ca2-d1be-4284-8b86-684f8cf253e8
+  PackageType: LegacyPackage
+  LegacyPackagePolicy: CanBeUnpackedTransparent
+  ExtraData:
+    {}
+  AssetDataMap:
+    Scene: !<own> 9e4ad98d-8826-44bf-80a3-71b954a3d16f
+  DependentFiles:
+    []
+  ImporterSettings: !<GltfImporterSettings>
+    UseLegacyImporter: false
+    WithMaterials: true
+    NamingConvention: ByCategorySanitizeV2
+    PersistentIdGenerationAlgorithm: DescriptorBasedV2
+    AnimationCurveOptimization: true
+    CustomAnimationSamplingRate: 30.000000
+    ImportVertexColor: true
+    ImportTangents: true
+    ImportMorphTargetAnimation: true
+    ConvertMetersToCentimeters: true
+    RegenerateTangents: false
+    OptimizeMesh: true
+  CompressionSettings: !<ComplexCompressionSettings>
+    Presets:
+      None Compression: !<FileCompressionSettings>
+        {}
+    ExtensionMappings:
+      mesh: None Compression
+    Overrides:
+      {}
+- !<SceneObject/188db3e6-0eff-4973-7be3-b954f3adb6c4>
+  PrefabRemaps:
+    []
+  Name: diode_do41
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 100.000000, y: 100.000000, z: 100.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 8ee94f09-60ee-4739-63d6-11b000eee4e1
+  Components:
+    []
+- !<SceneObject/21d0b3c2-a8bd-498a-5c37-b46792b34077>
+  PrefabRemaps:
+    []
+  Name: D_DO-41_SOD81_P10.16mm_Horizontal
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 967ad2c0-3b44-4622-54e4-29f4725b8005
+- !<SceneObject/61541e97-128b-4023-6f35-7d40ff3bd3b7>
+  PrefabRemaps:
+    []
+  Name: Scene0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 21d0b3c2-a8bd-498a-5c37-b46792b34077
+  Components:
+    []
+- !<SceneObject/8ee94f09-60ee-4739-63d6-11b000eee4e1>
+  PrefabRemaps:
+    []
+  Name: Scenes
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 61541e97-128b-4023-6f35-7d40ff3bd3b7
+  Components:
+    []
+- !<RenderMeshVisual/967ad2c0-3b44-4622-54e4-29f4725b8005>
+  PrefabRemaps:
+    []
+  Name: D_DO-41_SOD81_P10.16mm_Horizontal
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> e4633846-cd14-457c-b3ba-e443eaf9ea9d
+  Mesh: !<reference> 2184b47c-67b2-452c-8a9a-990f51804646
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<ObjectPrefabAssetData/9e4ad98d-8826-44bf-80a3-71b954a3d16f>
+  Prototype: !<ObjectOwner/360da22c-58de-4333-9e78-d798c686b02a>
+    PackagePath: ""
+    objects:
+      - !<own> 188db3e6-0eff-4973-7be3-b954f3adb6c4

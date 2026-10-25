@@ -1,0 +1,128 @@
+- !<AssetImportMetadata/3717c1f8-3dae-449b-9777-38c6fd42bfb8>
+  ImportedAssetIds:
+    .hidden/cad_0: !<reference> 43e845a6-f6ba-4df1-99f1-a5ad74e0d016
+    26ba073d67b9d0dd: !<reference> 1b813500-f106-48b1-9d84-f8c5d7892f6a
+    67cab8af3236dbd6: !<reference> 90505d27-5e8b-45d6-8c31-ca8c4e0c542e
+    88ab437fd121cc69: !<reference> d36db66d-daa1-435d-bcab-bcb5c08b4b99
+    8c2c6f3cf8d060fd: !<reference> f1bb4966-17bd-4a6c-9a93-0b8f1cc6e011
+    Materials/cad_0: !<reference> 29634567-2fee-421d-a81e-02bb15d094ba
+    Materials/cad_0|cad_0|GraphPassInfo: !<reference> b9a5d502-1e32-4782-966f-a682994fb12f
+    Meshes/simplesteeringservocap: !<reference> 337a0a8c-9196-4381-97d9-bedd5c3416cb
+    Scene: !<reference> 5e195f85-7769-455e-9bae-63deb96aa982
+    ac346301a702ff44: !<reference> f52e737e-279b-430f-8002-253bbb3486ec
+  ImporterName: GltfImporter
+  PrimaryAsset: !<reference> 5e195f85-7769-455e-9bae-63deb96aa982
+  PackageType: LegacyPackage
+  LegacyPackagePolicy: CanBeUnpackedTransparent
+  ExtraData:
+    {}
+  AssetDataMap:
+    Scene: !<own> 01e53a9c-91cd-4b13-8f7f-1fc7af214e03
+  DependentFiles:
+    []
+  ImporterSettings: !<GltfImporterSettings>
+    UseLegacyImporter: false
+    WithMaterials: true
+    NamingConvention: ByCategorySanitizeV2
+    PersistentIdGenerationAlgorithm: DescriptorBasedV2
+    AnimationCurveOptimization: true
+    CustomAnimationSamplingRate: 30.000000
+    ImportVertexColor: true
+    ImportTangents: true
+    ImportMorphTargetAnimation: true
+    ConvertMetersToCentimeters: true
+    RegenerateTangents: false
+    OptimizeMesh: true
+  CompressionSettings: !<ComplexCompressionSettings>
+    Presets:
+      None Compression: !<FileCompressionSettings>
+        {}
+    ExtensionMappings:
+      mesh: None Compression
+    Overrides:
+      {}
+- !<ObjectPrefabAssetData/01e53a9c-91cd-4b13-8f7f-1fc7af214e03>
+  Prototype: !<ObjectOwner/3beed297-eadc-4f3c-a541-0c3b43d95084>
+    PackagePath: ""
+    objects:
+      - !<own> 1b813500-f106-48b1-627b-073a2876d095
+- !<SceneObject/1b813500-f106-48b1-627b-073a2876d095>
+  PrefabRemaps:
+    []
+  Name: simplesteeringservocap
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 100.000000, y: 100.000000, z: 100.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> d36db66d-daa1-435d-4354-434a3f74b466
+  Components:
+    []
+- !<SceneObject/90505d27-5e8b-45d6-73ce-3573b1f3abd1>
+  PrefabRemaps:
+    []
+  Name: simplesteeringservocap
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> f52e737e-279b-430f-7ffd-dac444cb7913
+- !<SceneObject/d36db66d-daa1-435d-4354-434a3f74b466>
+  PrefabRemaps:
+    []
+  Name: Scenes
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> f1bb4966-17bd-4a6c-656c-f470e3391fee
+  Components:
+    []
+- !<SceneObject/f1bb4966-17bd-4a6c-656c-f470e3391fee>
+  PrefabRemaps:
+    []
+  Name: Scene0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 90505d27-5e8b-45d6-73ce-3573b1f3abd1
+  Components:
+    []
+- !<RenderMeshVisual/f52e737e-279b-430f-7ffd-dac444cb7913>
+  PrefabRemaps:
+    []
+  Name: simplesteeringservocap
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 29634567-2fee-421d-a81e-02bb15d094ba
+  Mesh: !<reference> 337a0a8c-9196-4381-97d9-bedd5c3416cb
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}

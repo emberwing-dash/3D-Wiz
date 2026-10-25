@@ -1,0 +1,53 @@
+- !<AssetImportMetadata/9ce4e9ec-1904-43d5-b657-56fd7db92c7e>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> b19c20f5-e317-4004-90a8-df97a2f68223
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> b19c20f5-e317-4004-90a8-df97a2f68223
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 40439e1a-ad86-4eca-8f98-63a27f74be6e
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/40439e1a-ad86-4eca-8f98-63a27f74be6e>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: 5e62db0a-725e-4ac8-a725-5bdf6a569c11
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    autoRun: false
+    only: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - autoRun: false
+      only: ""
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"label", "label":"<span style=\"color: #60A5FA;\">WizLeafClient - LEAF auto-runner</span>"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"Settings"}'
+    - '// @input bool autoRun {"hint":"Run the LEAF scenarios automatically when the Lens starts (testing only)"}'
+    - '// @input string only {"hint":"Comma-separated scenario ids to run; empty = all registered"}'
+    - '// @ui {"widget":"group_end"}'

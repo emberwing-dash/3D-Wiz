@@ -1,0 +1,128 @@
+- !<AssetImportMetadata/30cd0ef1-e549-464e-a51e-5752f79e433d>
+  ImportedAssetIds:
+    .hidden/cad_0: !<reference> 89cdd30b-63a7-4370-9f8b-f12cd5ce280f
+    26ba073d67b9d0dd: !<reference> 09bfbae8-1288-4f48-842c-26739a55d36c
+    619e9f3454123ed2: !<reference> 87fdc3eb-e482-4020-abac-8a8808ff06ef
+    88ab437fd121cc69: !<reference> d4a5a377-332b-4d89-89f9-18c90fd53252
+    8c2c6f3cf8d060fd: !<reference> 54420674-40c9-4bd8-91d4-e3b3a01d7252
+    Materials/cad_0: !<reference> 7c55a65c-b7cb-4206-aa4a-fcdba561280e
+    Materials/cad_0|cad_0|GraphPassInfo: !<reference> b8ed611e-ef46-4a75-9ffc-9e6d192db022
+    Meshes/motorclip: !<reference> 6ba6213d-e099-4e49-9a66-ae14c197e35f
+    Scene: !<reference> 50b7bc2d-c2d6-47d0-b97c-0c7053b8d711
+    a1ed33ad37e08981: !<reference> f04e1238-4dae-4595-af06-018582c1c576
+  ImporterName: GltfImporter
+  PrimaryAsset: !<reference> 50b7bc2d-c2d6-47d0-b97c-0c7053b8d711
+  PackageType: LegacyPackage
+  LegacyPackagePolicy: CanBeUnpackedTransparent
+  ExtraData:
+    {}
+  AssetDataMap:
+    Scene: !<own> f3d57be7-e157-4be9-a4d4-60612627b8e2
+  DependentFiles:
+    []
+  ImporterSettings: !<GltfImporterSettings>
+    UseLegacyImporter: false
+    WithMaterials: true
+    NamingConvention: ByCategorySanitizeV2
+    PersistentIdGenerationAlgorithm: DescriptorBasedV2
+    AnimationCurveOptimization: true
+    CustomAnimationSamplingRate: 30.000000
+    ImportVertexColor: true
+    ImportTangents: true
+    ImportMorphTargetAnimation: true
+    ConvertMetersToCentimeters: true
+    RegenerateTangents: false
+    OptimizeMesh: true
+  CompressionSettings: !<ComplexCompressionSettings>
+    Presets:
+      None Compression: !<FileCompressionSettings>
+        {}
+    ExtensionMappings:
+      mesh: None Compression
+    Overrides:
+      {}
+- !<SceneObject/09bfbae8-1288-4f48-7bd3-d98c65aa2c93>
+  PrefabRemaps:
+    []
+  Name: motorclip
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 100.000000, y: 100.000000, z: 100.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> d4a5a377-332b-4d89-7606-e736f02acdad
+  Components:
+    []
+- !<SceneObject/54420674-40c9-4bd8-6e2b-1c4c5fe28dad>
+  PrefabRemaps:
+    []
+  Name: Scene0
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> f04e1238-4dae-4595-50f9-fe7a7d3e3a89
+  Components:
+    []
+- !<RenderMeshVisual/87fdc3eb-e482-4020-5453-7577f700f910>
+  PrefabRemaps:
+    []
+  Name: motorclip
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 7c55a65c-b7cb-4206-aa4a-fcdba561280e
+  Mesh: !<reference> 6ba6213d-e099-4e49-9a66-ae14c197e35f
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
+- !<SceneObject/d4a5a377-332b-4d89-7606-e736f02acdad>
+  PrefabRemaps:
+    []
+  Name: Scenes
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    - !<own> 54420674-40c9-4bd8-6e2b-1c4c5fe28dad
+  Components:
+    []
+- !<SceneObject/f04e1238-4dae-4595-50f9-fe7a7d3e3a89>
+  PrefabRemaps:
+    []
+  Name: motorclip
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 87fdc3eb-e482-4020-5453-7577f700f910
+- !<ObjectPrefabAssetData/f3d57be7-e157-4be9-a4d4-60612627b8e2>
+  Prototype: !<ObjectOwner/454ba814-088d-4fca-b22a-3438a68e0a09>
+    PackagePath: ""
+    objects:
+      - !<own> 09bfbae8-1288-4f48-7bd3-d98c65aa2c93

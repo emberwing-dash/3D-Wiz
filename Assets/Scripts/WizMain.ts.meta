@@ -1,0 +1,74 @@
+- !<AssetImportMetadata/6e0d0674-04d9-4a1d-862d-1979b9091cdf>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> f508600f-f47a-4911-96f8-41d0410c37d7
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> f508600f-f47a-4911-96f8-41d0410c37d7
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 0d29507b-bff1-4fa8-afda-dcb2b00d8e38
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/0d29507b-bff1-4fa8-afda-dcb2b00d8e38>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: 0a033c58-2fc2-46d2-b451-746ce4438dbc
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    bench: false
+    debugAction: false
+    debugLog: false
+    debugStartMode: false
+    hud: false
+    menu: false
+    robot: false
+    visualize: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - robot: !<MappingBased.AssignableType_1> 00000000-0000-0000-0000-000000000000
+      bench: !<MappingBased.AssignableType_2> 00000000-0000-0000-0000-000000000000
+      visualize: !<MappingBased.AssignableType_3> 00000000-0000-0000-0000-000000000000
+      menu: !<MappingBased.AssignableType_4> 00000000-0000-0000-0000-000000000000
+      hud: !<MappingBased.AssignableType_5> 00000000-0000-0000-0000-000000000000
+      debugLog: false
+      debugStartMode: ""
+      debugAction: ""
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"label", "label":"<span style=\"color: #60A5FA;\">WizMain - 3D Wiz orchestrator (no buttons)</span>"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"References"}'
+    - '// @input AssignableType_1 robot {"hint":"Sesame robot (real parts, AR desk view, guided map)"}'
+    - '// @input AssignableType_2 bench {"hint":"Tinkercad-style circuit bench"}'
+    - '// @input AssignableType_3 visualize {"hint":"VISUALIZE workbench"}'
+    - '// @input AssignableType_4 menu {"hint":"Title screen + SAO icon menu"}'
+    - '// @input AssignableType_5 hud {"hint":"Tiny HUD (pips, XP, badges, i card)"}'
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"Settings"}'
+    - '// @input bool debugLog {"hint":"Log mode changes and inputs (debug)"}'
+    - '// @input string debugStartMode {"hint":"Debug: start in this mode (launch | visualize | build | overview | circuit | test)"}'
+    - '// @input string debugAction {"hint":"Debug: action run 1.5 s after the debug start, e.g. menu | pick | select:oled | wire:i2c_sda | cmd:wave | arrange | demo | pause"}'
+    - '// @ui {"widget":"group_end"}'
