@@ -1,0 +1,101 @@
+- !<AssetImportMetadata/69338d8b-f347-4383-8418-38f750aa22ac>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 44d14ed3-1f8e-4c5e-b23b-dc9e04b58a11
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 44d14ed3-1f8e-4c5e-b23b-dc9e04b58a11
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> c0ca12ae-b887-4fb9-a9a7-81f1993808fd
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/c0ca12ae-b887-4fb9-a9a7-81f1993808fd>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  VersionPrerelease: ""
+  UpdateOrder: 0
+  ComponentUid: 8649b30b-4ba0-4de0-a781-62378f04c70b
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    benchScale: false
+    boxMesh: false
+    cylinderMesh: false
+    debugLog: false
+    geminiKey: false
+    geminiModel: false
+    litMaterial: false
+    liveAi: false
+    modelSource: false
+    orbDistanceCm: false
+    panelWidthCm: false
+    sphereMesh: false
+    startMode: false
+    successHoldS: false
+    tableTiltDeg: false
+    unlitMaterial: false
+    userModel: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - boxMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+      sphereMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+      cylinderMesh: !<reference.RenderMesh> 00000000-0000-0000-0000-000000000000
+      litMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      unlitMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
+      userModel: !<reference.ObjectPrefab> 00000000-0000-0000-0000-000000000000
+      startMode: guide
+      modelSource: rc
+      benchScale: 1.400000
+      tableTiltDeg: !<float> 40.000000
+      panelWidthCm: !<float> 25.000000
+      orbDistanceCm: !<float> 50.000000
+      successHoldS: 1.100000
+      geminiKey: ""
+      liveAi: false
+      geminiModel: gemini-2.5-flash
+      debugLog: false
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @ui {"widget":"label", "label":"<span style=\"color: #60A5FA;\">WizGuide - Circuit Guide (video-guided build)</span>"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"References"}'
+    - '// @input Asset.RenderMesh boxMesh {"hint":"Unit cube mesh (1 cm)"}'
+    - '// @input Asset.RenderMesh sphereMesh {"hint":"Unit sphere mesh (1 cm)"}'
+    - '// @input Asset.RenderMesh cylinderMesh {"hint":"Unit cylinder mesh (1 cm)"}'
+    - '// @input Asset.Material litMaterial {"hint":"Lit glTF material"}'
+    - '// @input Asset.Material unlitMaterial {"hint":"Unlit material (glow, panels)"}'
+    - "// @input Asset.ObjectPrefab userModel {\"hint\":\"Optional: the user's imported FBX prefab (Assets/UserModels). Used when Model source is FBX.\"}"
+    - '// @ui {"widget":"group_end"}'
+    - '// @ui {"widget":"separator"}'
+    - '// @ui {"widget":"group_start", "label":"Settings"}'
+    - '// @input string startMode = "menu" {"hint":"What opens on reset: the original 3D Wiz main menu (Lab / Circuit / Visualize), or the Circuit Guide directly", "widget":"combobox", "values":[{"label":"Main menu (3D Wiz)", "value":"menu"}, {"label":"Circuit Guide directly", "value":"guide"}]}'
+    - '// @input string modelSource = "rc" {"hint":"Model on the table: the RC car sample parts or the imported FBX", "widget":"combobox", "values":[{"label":"RC car (printed parts)", "value":"rc"}, {"label":"User FBX prefab", "value":"fbx"}]}'
+    - '// @input float benchScale = 0.9 {"hint":"Size of the work table content (1 = real size; larger is easier to grab)", "widget":"slider", "min":0.7, "max":2.2, "step":0.1}'
+    - '// @input float tableTiltDeg = 40 {"hint":"How far the table top is tilted toward you (degrees); 0 = flat", "widget":"slider", "min":0, "max":60, "step":1}'
+    - '// @input float panelWidthCm = 18 {"hint":"Width of the left step panel in cm", "widget":"slider", "min":16, "max":30, "step":1}'
+    - '// @input float orbDistanceCm = 50 {"hint":"Distance of the voice orb in front of you in cm (front-right)", "widget":"slider", "min":35, "max":70, "step":1}'
+    - '// @input float successHoldS = 1.1 {"hint":"Seconds the green success glow shows before the next step starts", "widget":"slider", "min":0.4, "max":3, "step":0.1}'
+    - '// @input string geminiKey {"hint":"Gemini API key (optional). Better: put it in .env and run tools/apply-env.ps1 (see README). If you paste it here, CLEAR it before saving or committing. Never logged or echoed by the Lens. Empty here AND in .env = offline."}'
+    - '// @input bool liveAi {"hint":"Live AI (Gemini). OFF = the demo is fully offline and instant: no network call is ever made. ON = Gemini only warms a cache in the background and powers ASK MORE; it never blocks or changes the demo."}'
+    - '// @input string geminiModel = "gemini-flash-latest" {"hint":"Gemini model used for the intent and the step list (a small fast one)"}'
+    - '// @input bool debugLog {"hint":"Log steps and results (debug)"}'
+    - '// @ui {"widget":"group_end"}'

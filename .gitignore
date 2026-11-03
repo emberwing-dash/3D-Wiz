@@ -1,4 +1,4 @@
-# Lens Studio generated / local state (regenerated when the project is opened)
+﻿# Lens Studio generated / local state (regenerated when the project is opened)
 Cache/
 Support/
 Workspaces/
@@ -16,3 +16,15 @@ leaf_plugin_settings.json
 # never commit keys
 *.pem
 *.key
+
+# BEGIN Lens Studio managed Agents-Docs block
+.cursor/mcp.json
+.vscode/mcp.json
+.codex/config.toml
+.claude/settings.local.json
+# END Lens Studio managed Agents-Docs block
+# Added by Lens Studio (LEAF plugin)
+# Gemini key handling (see README "Live AI key"): the real key lives only in .env; Assets/Scripts/GeminiKeyLocal.ts is generated from it
+.env
+.env.local
+Assets/Scripts/GeminiKeyLocal.generated.ts

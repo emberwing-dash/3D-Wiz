@@ -17,6 +17,17 @@ export const SFX_ERROR = requireAsset("../UI/Audio/errorState.wav") as AudioTrac
 export const SFX_SPAWN = requireAsset("../UI/Audio/robotSpawn.wav") as AudioTrackAsset
 export const SFX_PING = requireAsset("../UI/Audio/inputRecieved.wav") as AudioTrackAsset
 
+export const SFX_OPEN = requireAsset("../UI/Audio/sfx_open.wav") as AudioTrackAsset
+export const SFX_CLOSE = requireAsset("../UI/Audio/sfx_close.wav") as AudioTrackAsset
+export const SFX_THUNK = requireAsset("../UI/Audio/sfx_thunk.wav") as AudioTrackAsset
+export const SFX_FLAG = requireAsset("../UI/Audio/sfx_flag.wav") as AudioTrackAsset
+export const SFX_ZAP = requireAsset("../UI/Audio/sfx_zap.wav") as AudioTrackAsset
+export const SFX_STEP = requireAsset("../UI/Audio/sfx_step.wav") as AudioTrackAsset
+export const SFX_MOTOR = requireAsset("../UI/Audio/sfx_motor.wav") as AudioTrackAsset
+export const SFX_ON = requireAsset("../UI/Audio/sfx_on.wav") as AudioTrackAsset
+export const SFX_OFF = requireAsset("../UI/Audio/sfx_off.wav") as AudioTrackAsset
+export const SFX_BLIP = requireAsset("../UI/Audio/sfx_blip.wav") as AudioTrackAsset
+
 export const COLOR_PLATE: RGBA = [0.06, 0.09, 0.14, 0.94]
 export const COLOR_SLOT: RGBA = [0.1, 0.14, 0.21, 0.96]
 export const COLOR_TEXT = new vec4(0.93, 0.97, 1, 1)

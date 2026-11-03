@@ -6,6 +6,7 @@
 import {makeInteractable} from "./WizInteract"
 import {PartKit} from "./WizParts"
 import {RGBA} from "./ProjectPack"
+import {makeIconQuad} from "./WizIcons"
 
 const TABLE_DROP = 39 // cm below the eyes (default): the height of a desk or table top in front of a seated user
 const TABLE_W = 90
@@ -43,6 +44,11 @@ export class WizPlacement {
   private planeY = -55
   private placedOnce = false
   onPlaced: () => void = () => {}
+  onPoint: (p: vec3) => void = () => {} // point mode: a click drops a checkpoint at the ring
+  private mode: "model" | "point" = "model"
+  private cursor: SceneObject | null = null
+  private clickT = 0
+  private lastClick = -10
 
   /** `root` = the 3DWiz root that is moved; `deskLocal` = where the desk plane sits in the workbench frame. */
   private deskLocal: vec3
@@ -69,7 +75,7 @@ export class WizPlacement {
     col.shape = box
     const it = makeInteractable(hit)
     it.targetingMode = 3
-    it.onTriggerEnd.add(() => this.confirm())
+    it.onTriggerEnd.add(() => this.click())
     // the ring that follows the gaze
     this.marker = global.scene.createSceneObject("PlaceMarker")
     const ring = kit.shape(this.marker, "cyl", [0, 0.3, 0], [14, 0.2, 14], CYAN, "ring", false)
@@ -84,7 +90,45 @@ export class WizPlacement {
     this.deskLocal = v
   }
 
+  /** The hand cursor over the ring: the mouse stands in for the hand in the preview (it presses when you click). */
+  makeCursor(boxMesh: RenderMesh, faceMat: Material) {
+    const q = makeIconQuad(this.marker, boxMesh, faceMat, "PlaceCursor", "touch_app", 6, [0.55, 1.0, 1.0, 1])
+    q.obj.getTransform().setLocalPosition(new vec3(0, 5.5, 0))
+    this.cursor = q.obj
+  }
+
+  /** Checkpoint mode: the table and ring show, the model stays put, every click calls onPoint(ring position). */
+  beginPoints() {
+    this.cam = mainCamera()
+    if (!this.cam) return
+    this.mode = "point"
+    this.on = true
+    this.planeY = this.cam.getTransform().getWorldPosition().y - TABLE_DROP
+    this.plane.enabled = true
+    this.marker.enabled = true
+    this.update(0)
+  }
+
+  endPoints() {
+    if (this.mode === "point") this.cancel()
+  }
+
+  isPointMode(): boolean {
+    return this.on && this.mode === "point"
+  }
+
+  /** A mouse click / tap anywhere (the preview's stand-in for a pinch on the table). */
+  click() {
+    if (!this.on) return
+    if (this.clock - this.lastClick < 0.3) return // a pinch and a mouse click for the same press count once
+    this.lastClick = this.clock
+    this.clickT = 0.25
+    if (this.mode === "model") this.confirm()
+    else this.onPoint(this.spot)
+  }
+
   begin() {
+    this.mode = "model"
     this.cam = mainCamera()
     if (!this.cam) return
     this.on = true
@@ -93,6 +137,13 @@ export class WizPlacement {
     this.plane.enabled = true
     this.marker.enabled = true
     this.update(0)
+  }
+
+  /** Put the workspace where it starts (the desk spot of the title screen, on the table in view) without asking the user to look down and pinch. */
+  placeDefault() {
+    this.cam = mainCamera()
+    this.placeAt(this.deskLocal)
+    this.placedOnce = true
   }
 
   cancel() {
@@ -120,7 +171,7 @@ export class WizPlacement {
       const k = (this.planeY - o.y) / d.y
       hit = o.add(d.uniformScale(Math.min(k, 140)))
     } else {
-      hit = new vec3(o.x + d.x * 85, this.planeY, o.z + d.z * 85) // looking level or up: 85 cm ahead (the glasses view is narrow: far enough that a 20 cm model fits)
+      hit = new vec3(o.x + d.x * 70, this.planeY, o.z + d.z * 70) // looking level or up: 70 cm ahead
     }
     // keep it at a comfortable reach: 30 to 110 cm from the user (flat distance)
     const dx = hit.x - o.x
@@ -142,6 +193,15 @@ export class WizPlacement {
     this.plane.getTransform().setWorldRotation(quat.angleAxis(Math.atan2(-f.x, -f.z), vec3.up()))
     const pulse = 1 + Math.sin(this.clock * 5) * 0.06
     this.marker.getTransform().setWorldScale(new vec3(pulse, 1, pulse))
+    // model mode: the model itself is the preview, it follows the ring until you click
+    if (this.mode === "model") this.placeAt(this.spot)
+    // the hand cursor bobs, turns to you and presses on a click
+    if (this.cursor && !isNull(this.cursor)) {
+      this.clickT = Math.max(0, this.clickT - dt)
+      const bob = Math.sin(this.clock * 4) * 0.6 - (this.clickT > 0 ? 2.2 : 0)
+      this.cursor.getTransform().setLocalPosition(new vec3(0, 5.5 + bob, 0))
+      this.cursor.getTransform().setWorldRotation(this.cam.getTransform().getWorldRotation())
+    }
   }
 
   /** The place action (pinch on the table). Also the test hook. */

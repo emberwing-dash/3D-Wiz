@@ -145,7 +145,7 @@ export class WizBench extends BaseScriptComponent {
   private clock: number = 0
   private sch: WizSchematic | null = null
   private railIds: string[] = []
-  private labView: "diagram" | "3d" = "diagram"
+  private labView: "diagram" | "3d" | "both" = "both"
   private asm: {ids: string[]; i: number; t: number; phase: "parts" | "wires" | "done"; wi: number; wt: number; wires: WireRt[]} | null = null
   private hand: SceneObject | null = null
   private handIndex: SceneObject | null = null
@@ -476,10 +476,12 @@ export class WizBench extends BaseScriptComponent {
   // ---------------------------------------------------------------- Circuit Lab (free wiring)
   setLab(on: boolean) {
     this.labOn = on
-    this.labView = "diagram"
+    this.labView = "both"
     this.asm = null
-    this.tilt.enabled = !on // the Lab wires on the circuit diagram (3D view on request); the 3D bench returns when it ends
+    // the Lab shows the KiCad sheet standing up AND the real parts on the table in front of it (both interactive); the 3D-only view is on request
+    this.tilt.enabled = true
     if (this.sch) this.sch.show(on)
+    this.applyLabLayout(on ? "both" : "3d")
     // dense parts (DIP chips, the ESP32 header) would pile their pin names up: the pin picker names them instead
     for (const id of this.partOrder) for (const l of this.parts[id].labels) l.getSceneObject().enabled = this.labsOn(id, on)
     if (on) {
@@ -501,12 +503,40 @@ export class WizBench extends BaseScriptComponent {
   }
 
   /** Lab view: the KiCad-style diagram (wire here) or the 3D bench with the tidy wiring. */
-  setLabView(v: "diagram" | "3d") {
+  setLabView(v: "diagram" | "3d" | "both") {
     if (!this.labOn) return
     this.labView = v
-    this.tilt.enabled = v === "3d"
-    if (this.sch) this.sch.show(v === "diagram")
+    this.tilt.enabled = v !== "diagram"
+    if (this.sch) this.sch.show(v !== "3d")
+    this.applyLabLayout(v)
     if (v === "diagram") this.stopAssembly()
+  }
+
+  /** Where the 3D parts and the sheet sit for each lab view (bench frame, cm). */
+  private applyLabLayout(v: "diagram" | "3d" | "both") {
+    const pl = PROJECT_PACK.placement
+    const tt = this.tilt.getTransform()
+    if (v === "both") {
+      tt.setLocalPosition(new vec3(0, -4.2, 7))
+      tt.setLocalRotation(quat.fromEulerVec(new vec3(14 * DEG, 0, 0)))
+      const s = pl.benchScale * 0.8
+      tt.setLocalScale(new vec3(s, s, s))
+      if (this.sch) this.sch.fit(19, 20, 0, 14.5, -6)
+    } else {
+      tt.setLocalPosition(new vec3(0, 0, 0))
+      tt.setLocalRotation(quat.fromEulerVec(new vec3(pl.benchTiltDeg * DEG, 0, 0)))
+      tt.setLocalScale(new vec3(pl.benchScale, pl.benchScale, pl.benchScale))
+      if (this.sch) this.sch.fit(22, 26, -3, 1.5, 4)
+    }
+  }
+
+  /** A bare mouse click while the sheet is up (see WizSchematic.clickScreen). */
+  sheetClick(cam: Camera, uv: vec2): boolean {
+    return this.labOn && this.sch !== null && this.labView !== "3d" && this.sch.clickScreen(cam, uv)
+  }
+
+  sheetZoomed(): boolean {
+    return this.sch !== null && this.sch.isZoomed()
   }
 
   labViewMode(): string {

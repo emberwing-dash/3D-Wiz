@@ -1,4 +1,4 @@
-// WizLeafSave.ts - LEAF c6: Save session / Continue. Progress (mode, build step, wires, XP, badges, Visualize layout) is written to the
+// WizLeafSave.ts - LEAF c6: Save session / Continue. Progress (mode, build step, wires, Visualize layout) is written to the
 // Lens persistent store; after a (simulated) reload the title screen offers Continue and restores it.
 // NOTE: this proves the store round-trip inside the preview run; surviving a full Lens restart is checked by the README procedure.
 
@@ -25,8 +25,7 @@ export class WizLeafSave extends Scenario {
     await sleep(500)
     for (let i = 0; i < 3; i++) await playStep(main, it) // three steps of progress
     const step = main.getDebug().step
-    const xp = main.getDebug().xp
-    check(step === 4 && xp > 0, "progress made: step " + step + " xp " + xp)
+    check(step === 4, "progress made: step " + step)
 
     main.saveSession() // saving is automatic when the Library opens; the scenario saves directly
     expect(main.getDebug().saved).toBe(true)
@@ -41,13 +40,14 @@ export class WizLeafSave extends Scenario {
     await press(it, "menu_icon_continue", 1200)
     expect(main.getDebug().mode).toBe("build")
     expect(main.getDebug().step).toBe(step)
-    expect(main.getDebug().xp).toBe(xp)
 
     // the saved scene (Visualize) comes back with Continue
     main.toLaunch()
     await sleep(300)
     await openMenu(main)
-    await press(it, "menu_icon_visualize", 900)
+    main.menu.closeMenu("test") // the title no longer has the old Visualize icon; enter that scene directly
+    main.enterMode("visualize")
+    await sleep(900)
     main.saveSession()
     main.reloadSave()
     main.toLaunch()

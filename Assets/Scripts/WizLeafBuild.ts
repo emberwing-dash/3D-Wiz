@@ -63,8 +63,6 @@ export class WizLeafBuild extends Scenario {
     check(main.robot.isPlacedVisible("frame"), "right place + right way up snaps in")
     await sleep(1400)
     expect(main.getDebug().step).toBe(2)
-    check(main.getDebug().xp >= 10, "XP awarded: " + main.getDebug().xp)
-    check(main.getDebug().badges.indexOf("first") >= 0, "first-snap badge")
 
     // play the rest perfectly: parts snap, wiring steps are won by pinching the glowing wires
     for (let i = 1; i < steps.length; i++) {
@@ -79,8 +77,6 @@ export class WizLeafBuild extends Scenario {
     check(main.getDebug().buildComplete, "build complete")
     check(main.getDebug().playUnlocked, "completion unlocks Play")
     check(main.robot.confettiActive(), "celebration burst")
-    check(main.getDebug().badges.indexOf("builder") >= 0, "builder badge")
-    check(main.getDebug().stars.reduce((a: number, b: number) => a + b, 0) > 0, "stars were awarded per quest: " + main.getDebug().stars.join(","))
     await openMenu(main)
     check(main.menu.hasItem("play"), "Play icon present")
     void textOf

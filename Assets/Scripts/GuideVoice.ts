@@ -1,0 +1,265 @@
+// GuideVoice.ts - the logic of the voice-to-build flow (no scene access): the tutorial catalogue, intent parsing and validation, the local
+// keyword fallback, and the Gemini client.
+// Owns: CATALOGUE, parseIntentJson / keywordIntent / filterCatalogue, geminiText / parseStepsJson (strict validation) and GeminiClient.
+// Must not: touch the scene, log or echo the API key, or block the flow: every Gemini path has a local fallback and a timeout.
+//
+// HONEST NOTE: the "videos" are a small LOCAL catalogue (titles only, no video picture, no live YouTube search). With a key, Gemini
+// only reads the spoken sentence (intent) and may write the step list; without a key the keyword match and RC_SAMPLE are used.
+
+import {GuidePack, RC_SAMPLE, parseGuidePack} from "./GuideData"
+
+export interface Tutorial {
+  id: string // also the project name Gemini must answer with
+  title: string
+  blurb: string
+  tags: string[]
+  ready: boolean // a step list exists in this build
+}
+
+export const CATALOGUE: Tutorial[] = [
+  {id: "rc-car", title: "RC Car", blurb: "Motor driver + steering servo", tags: ["rc", "car", "drive", "motor", "build", "remote", "toy"], ready: true},
+  {id: "servo-hand", title: "Servo Hand", blurb: "One servo per finger (no step list yet)", tags: ["hand", "servo", "finger", "arm", "robot"], ready: false},
+  {id: "desk-pet", title: "Desk Pet", blurb: "OLED face pet (no step list yet)", tags: ["pet", "desk", "oled", "face", "cat", "buddy"], ready: false},
+  {id: "led-blink", title: "LED Starter", blurb: "First circuit: LED + resistor (no step list yet)", tags: ["led", "light", "blink", "starter", "basic"], ready: false},
+]
+
+export interface Intent {
+  intent: "build"
+  project: string
+  search_query: string
+}
+
+/** Key order: the Inspector field first, else the generated local module (.env), else none (offline). Pure, so it is unit-tested with fake strings. */
+export function pickKey(inspector: string, local: string): string {
+  const a = inspector.trim()
+  return a.length > 0 ? a : local.trim()
+}
+
+export const SCRIPTED_LINE = "I want build car"
+
+/** Strict validation of the JSON Gemini returns for the spoken sentence. Returns null on anything unexpected. */
+export function parseIntentJson(text: string): Intent | null {
+  let o: any
+  try {
+    o = JSON.parse(text.trim().replace(/^```json\s*/i, "").replace(/```$/, ""))
+  } catch (e) {
+    return null
+  }
+  if (!o || typeof o !== "object") return null
+  if (o.intent !== "build") return null
+  if (typeof o.project !== "string" || CATALOGUE.filter((t) => t.id === o.project).length === 0) return null
+  if (typeof o.search_query !== "string") return null
+  const q = o.search_query.trim().toLowerCase()
+  if (q.length === 0 || q.length > 40 || !/^[a-z0-9 \-]+$/.test(q)) return null
+  return {intent: "build", project: o.project, search_query: q}
+}
+
+/** The offline path: a keyword match on the transcript. Always returns an intent (default: the RC car). */
+export function keywordIntent(transcript: string): Intent {
+  const t = " " + transcript.toLowerCase() + " "
+  let best = CATALOGUE[0]
+  let bestScore = 0
+  for (const c of CATALOGUE) {
+    let s = 0
+    for (const tag of c.tags) if (t.indexOf(" " + tag + " ") >= 0 || t.indexOf(" " + tag + "s ") >= 0) s += 2
+    if (t.indexOf(c.title.toLowerCase()) >= 0) s += 3
+    if (s > bestScore) {
+      best = c
+      bestScore = s
+    }
+  }
+  const q = best.id === "rc-car" ? "rc car" : best.title.toLowerCase()
+  return {intent: "build", project: best.id, search_query: q}
+}
+
+/** Ranked, filtered catalogue for what is typed (empty text = everything). */
+export function filterCatalogue(query: string): Tutorial[] {
+  const toks = query.toLowerCase().split(/\s+/).filter((x) => x.length > 0)
+  if (toks.length === 0) return CATALOGUE.slice()
+  const scored = CATALOGUE.map((c) => {
+    let s = 0
+    const hay = (c.title + " " + c.blurb + " " + c.tags.join(" ")).toLowerCase()
+    for (const t of toks) if (hay.indexOf(t) >= 0) s += c.title.toLowerCase().indexOf(t) >= 0 ? 3 : 1
+    return {c: c, s: s}
+  })
+  return scored.filter((x) => x.s > 0).sort((a, b) => b.s - a.s).map((x) => x.c)
+}
+
+/** Text of the first candidate of a Gemini generateContent response (or "" when the shape is wrong). */
+export function geminiText(resp: any): string {
+  try {
+    const t = resp.candidates[0].content.parts[0].text
+    return typeof t === "string" ? t : ""
+  } catch (e) {
+    return ""
+  }
+}
+
+/** Gemini's step list -> a validated GuidePack (RC_SAMPLE's parts / pins / spots / board with new steps). null if anything does not resolve. */
+export function stepsProblem(text: string): string {
+  try {
+    const o = JSON.parse(text.trim().replace(/^```json\s*/i, "").replace(/```$/, ""))
+    const steps = Array.isArray(o) ? o : o.steps
+    if (!Array.isArray(steps) || steps.length < 2 || steps.length > 14) return "step count outside 2..14"
+    parseGuidePack(JSON.stringify({...RC_SAMPLE, steps: steps}))
+    return ""
+  } catch (e) {
+    return String(e).substring(0, 120)
+  }
+}
+
+export function parseStepsJson(text: string): GuidePack | null {
+  try {
+    const o = JSON.parse(text.trim().replace(/^```json\s*/i, "").replace(/```$/, ""))
+    const steps = Array.isArray(o) ? o : o.steps
+    if (!Array.isArray(steps) || steps.length < 2 || steps.length > 14) return null
+    const pack: GuidePack = {...RC_SAMPLE, steps: steps, source: "Step list written by Gemini (validated), not analysed from a video"}
+    return parseGuidePack(JSON.stringify(pack))
+  } catch (e) {
+    return null
+  }
+}
+
+const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/"
+
+export class GeminiClient {
+  /** Last call, for the log (never the key): http status, milliseconds, a short note. */
+  lastStatus = 0
+  lastMs = 0
+  lastNote = ""
+  stepsNote = ""
+  /** `getKey` reads the Inspector field at call time; the key is only ever put in a request header and never logged or stored. */
+  constructor(private getKey: () => string, private model: () => string, private delay: (sec: number, f: () => void) => void, private enabled: () => boolean = () => true) {}
+
+  /** Quota guards: answers are cached in memory by request text (never by key), identical in-flight calls are shared, a session makes at most
+   *  `maxCalls` network calls and nothing is retried. Not persisted: a persisted copy would only be prompts and answers, but it is not needed yet. */
+  private cache: {[k: string]: string} = {}
+  private inflight: {[k: string]: Promise<string>} = {}
+  calls = 0
+  maxCalls = 8
+
+  /** Live AI is on only when the Inspector switch `liveAi` is on AND a key is set. Off = no network call is ever made. */
+  available(): boolean {
+    return this.enabled() && this.getKey().trim().length > 10
+  }
+
+  hasCached(prompt: string): boolean {
+    return this.cache[prompt] !== undefined
+  }
+
+  /** A step list written earlier (pre-warmed) for this project, already validated, or null. Never starts a call. */
+  cachedSteps(project: string): GuidePack | null {
+    const t = this.cache[this.stepsPrompt(project) + "|json"]
+    return t !== undefined ? parseStepsJson(t) : null
+  }
+
+  /** The intent already read for this sentence, or null. Never starts a call. */
+  cachedIntent(transcript: string): Intent | null {
+    const t = this.cache[this.intentPrompt(transcript) + "|json"]
+    return t !== undefined ? parseIntentJson(t) : null
+  }
+
+  /** Fire and forget: fill the cache in the background (one call per distinct request). The UI never waits for it. */
+  warmSteps(project: string): void {
+    if (!this.available() || this.cachedSteps(project) !== null) return
+    this.steps(project).catch(() => undefined)
+  }
+
+  warmIntent(transcript: string): void {
+    if (!this.available() || this.cachedIntent(transcript) !== null) return
+    this.intent(transcript).catch(() => undefined)
+  }
+
+  private post(prompt: string, json: boolean = true, timeoutS: number = 12): Promise<string> {
+    const ck = prompt + (json ? "|json" : "|text")
+    if (this.cache[ck] !== undefined) return Promise.resolve(this.cache[ck])
+    if (!this.available()) return Promise.reject(new Error("live AI is off"))
+    let base = this.inflight[ck]
+    if (base === undefined) {
+      if (this.calls >= this.maxCalls) return Promise.reject(new Error("call cap reached"))
+      this.calls++
+      base = this.rawFetch(prompt, json)
+      this.inflight[ck] = base
+      // the call is kept until it really finishes: a caller that gave up (timeout) neither loses the answer (it still fills the cache)
+      // nor causes a second identical call while this one is running
+      base.then(
+        (t) => {
+          this.cache[ck] = t
+          delete this.inflight[ck]
+        },
+        () => {
+          delete this.inflight[ck]
+        },
+      )
+    }
+    const wait = new Promise<string>((_, rej) => this.delay(timeoutS, () => rej(new Error("timeout"))))
+    return Promise.race([base, wait])
+  }
+
+  private async rawFetch(prompt: string, json: boolean): Promise<string> {
+    const net: any = require("LensStudio:InternetModule")
+    const req = new Request(ENDPOINT + this.model().trim() + ":generateContent", {
+      method: "POST",
+      headers: {"Content-Type": "application/json", "x-goog-api-key": this.getKey().trim()},
+      body: JSON.stringify({contents: [{parts: [{text: prompt}]}], generationConfig: json ? {responseMimeType: "application/json", temperature: 0.1} : {temperature: 0.3, maxOutputTokens: 900}}),
+    } as any)
+    const t0 = getTime()
+    const call = (async () => {
+      const res: any = await net.fetch(req)
+      this.lastStatus = res.status
+      const body = await res.text()
+      this.lastMs = Math.round((getTime() - t0) * 1000)
+      if (res.status !== 200) {
+        let msg = ""
+        try {
+          msg = String(JSON.parse(body).error.message).substring(0, 100)
+        } catch (e) {
+          msg = ""
+        }
+        this.lastNote = "http " + res.status + (msg ? " " + msg : "")
+        throw new Error(this.lastNote)
+      }
+      this.lastNote = "ok"
+      return geminiText(JSON.parse(body))
+    })()
+    // a hard stop so a hung request cannot block identical requests for the rest of the session
+    const hard = new Promise<string>((_, rej) => this.delay(60, () => rej(new Error("hard timeout"))))
+    return Promise.race([call, hard])
+  }
+
+  private intentPrompt(transcript: string): string {
+    const names = CATALOGUE.map((c) => c.id).join(", ")
+    return (
+      'You read what a maker said and answer ONLY with strict JSON {"intent":"build","project":"<one of: ' + names + '>","search_query":"<2-4 lowercase words to search a tutorial>"}. ' +
+      'Sentence: "' + transcript.replace(/"/g, "'") + '"'
+    )
+  }
+
+  async intent(transcript: string): Promise<Intent | null> {
+    return parseIntentJson(await this.post(this.intentPrompt(transcript)))
+  }
+
+  /** Short free-text answer for the ANALYSE page ("Ask more"). Only called when a key is set; the caller falls back to the local card. */
+  async ask(part: string, what: string, timeoutS: number = 12): Promise<string> {
+    const t = await this.post("In 3 short plain sentences, tell a maker more about this part of a DIY RC car: " + part + " (" + what + "). No markdown.", false, timeoutS)
+    return t.trim()
+  }
+
+  private stepsPrompt(project: string): string {
+    const parts = RC_SAMPLE.parts.map((p) => p.id + " pins: " + p.pins.map((q) => q.id).join(",")).join("; ")
+    const spots = RC_SAMPLE.spots.map((s) => s.id).join(", ")
+    return (
+      'Write the build steps of an RC car circuit as strict JSON {"steps":[...]}. Each step: {"id":"s1","kind":"place"|"wire","title":"","text":"","part":"","spot":"","pins":["part.pin","part.pin"],"say":"","after":"","clip":"","hint":""}. ' +
+      "place steps use part+spot only; wire steps use pins only. Use ONLY these ids. Parts: " + parts + ". Board pins: bb.P+, bb.N. Spots: " + spots + ". " +
+      "6 to 10 steps, plain words, say = one narration sentence, hint = one short sentence for the likely mistake. (" + project + ")"
+    )
+  }
+
+  async steps(project: string): Promise<GuidePack | null> {
+    if (project !== "rc-car") return null
+    const text = await this.post(this.stepsPrompt(project), true, 30)
+    const why = stepsProblem(text)
+    this.stepsNote = why === "" ? "accepted by parseGuidePack" : "rejected: " + why
+    return parseStepsJson(text)
+  }
+}

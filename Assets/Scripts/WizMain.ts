@@ -1,6 +1,6 @@
-// WizMain.ts - 3D Wiz orchestrator: title screen, SAO icon menu actions, the build game (quests, XP, stars, badges), the wire game,
+// WizMain.ts - 3D Wiz orchestrator: title screen, SAO icon menu actions, the build game (quests), the wire game,
 //              Visualize (try-before-you-build), Play (simulated test lab), pause + save / continue.
-// Owns: mode state, progress/XP/badges, persistence (PersistentStorageSystem), what each menu icon does, HUD content, project switching.
+// Owns: mode state, build progress, persistence (PersistentStorageSystem), what each menu icon does, HUD content, project switching.
 // Reads ALL data from PROJECT_PACK. Expects @inputs wired by the bootstrap. There are NO buttons: direct manipulation + the menu.
 // Must not: build UI widgets, own component/connection data, or mix the simulated test lab with the wiring check.
 
@@ -16,7 +16,7 @@ import {WizPlacement, mainCamera} from "./WizPlacement"
 import {WizInventory} from "./WizInventory"
 import {WizVizBar} from "./WizVizBar"
 import {WizArView} from "./WizArView"
-import {makeAudio, sfx, SFX_PICK, SFX_OK, SFX_ERROR, SFX_SPAWN, SFX_PING} from "./WizUI"
+import {makeAudio, sfx, SFX_PICK, SFX_OK, SFX_ERROR, SFX_SPAWN, SFX_PING, SFX_OPEN, SFX_CLOSE, SFX_THUNK, SFX_FLAG, SFX_ZAP, SFX_STEP, SFX_MOTOR, SFX_ON, SFX_OFF, SFX_BLIP} from "./WizUI"
 import {WizPhoboAI, PhoboContext} from "./WizPhoboAI"
 import {WizVisualize} from "./WizVisualize"
 import {WizMenu, MenuItem} from "./WizMenu"
@@ -24,7 +24,9 @@ import {WizHud} from "./WizHud"
 import {packSizeLabel} from "./WizParts"
 import {PACKS, TEMPLATE_IDS, cardDefs, activateProject, nextTemplate, currentTemplate, MY_MODEL_ID, packEntry} from "./PackRegistry"
 import {WizCircuitLab} from "./WizCircuitLab"
-import {toWorld, isSpectacles} from "./WizInteract"
+import {toWorld, isSpectacles, uiPressedWithin} from "./WizInteract"
+import {WizRoute} from "./WizRoute"
+import {WizGuide} from "./WizGuide"
 
 // The guided Build game is no longer offered in the menu (the Circuit lab + Drive replace it); its code stays for the LEAF tests.
 const BUILD_IN_MENU = false
@@ -32,14 +34,6 @@ const BUILD_IN_MENU = false
 type Mode = "launch" | "overview" | "build" | "circuit" | "test" | "visualize" | "lab" | "drive"
 
 const SAVE_KEY = "3dwiz_session_v1"
-const BADGES: {id: string; color: RGBA}[] = [
-  {id: "first", color: [0.35, 1.0, 1.0, 1]},
-  {id: "clean", color: [1.0, 0.85, 0.25, 1]},
-  {id: "wired", color: [0.3, 1.0, 0.5, 1]},
-  {id: "builder", color: [1.0, 0.5, 0.2, 1]},
-  {id: "fit", color: [0.6, 0.7, 1.0, 1]},
-  {id: "screw", color: [0.9, 0.9, 0.95, 1]},
-]
 const PLAY_PAGES: string[][] = [
   ["walk", "wave", "dance", "bow", "rest", "stand", "cute"],
   ["freaky", "worm", "shake", "shrug", "dead", "crab", "swim"],
@@ -69,7 +63,7 @@ export class WizMain extends BaseScriptComponent {
   @hint("Title screen + SAO icon menu")
   menu!: WizMenu
   @input
-  @hint("Tiny HUD (pips, XP, badges, i card)")
+  @hint("Tiny HUD (pips, i card)")
   hud!: WizHud
   @ui.group_end
   @ui.separator
@@ -102,10 +96,8 @@ export class WizMain extends BaseScriptComponent {
   private paused: boolean = false
   private playPage: number = -1
   private hudLine: string = ""
-  private xp: number = 0
-  private badges: string[] = []
   private questMistakes: number[] = [0, 0, 0, 0]
-  private questStars: number[] = [0, 0, 0, 0]
+  private petCelebrated = false
   private snaps: number = 0
   private demoSeen: boolean = false
   private mover: WizMover | null = null
@@ -117,7 +109,13 @@ export class WizMain extends BaseScriptComponent {
   private inventory!: WizInventory
   private vizBar!: WizVizBar
   private ar!: WizArView
+  private route!: WizRoute
+  private moveBar!: WizVizBar
   private uiAudio!: AudioComponent
+  private motorAudio!: AudioComponent
+  private motorOn = false
+  private stepT = 0
+  private menuWasOpen = false
   private idleT = 0
   private introSeen: {[mode: string]: boolean} = {}
   private testedInputs: {[id: string]: boolean} = {}
@@ -135,8 +133,7 @@ export class WizMain extends BaseScriptComponent {
     this.clab = new WizCircuitLab(this.bench, this.hud)
     this.clab.onProgress = (fn, first) => {
       if (first) {
-        this.addXp(20)
-        this.hud.toast("+20", new vec4(1.0, 0.85, 0.25, 1))
+        void 0
       }
     }
     this.clab.onWireCount = () => (this.idleT = 0)
@@ -146,12 +143,12 @@ export class WizMain extends BaseScriptComponent {
       this.phobo.setChips([{id: "why", label: "Why?"}, {id: "next", label: "Next?"}])
     }
     this.clab.onVerified = (n, total) => {
-      this.addXp(5)
+      void 0
       this.phoboSay(n + " of " + total + " verified", "happy")
     }
     this.clab.onAllPassed = () => {
-      this.giveBadge("wired")
-      this.addXp(30)
+      void 0
+      void 0
       if (this.clab.verifyMode()) {
         this.phoboSay("Pet activated!", "wow")
         this.robot.celebrate()
@@ -215,6 +212,8 @@ export class WizMain extends BaseScriptComponent {
     else if (parts[0] === "cmd") this.runCommand(arg)
     else if (parts[0] === "arrange") this.visualize.arrangeNow()
     else if (parts[0] === "demo") this.visualize.playDemo()
+    else if (parts[0] === "voice") WizGuide.instance?.voice.micTap()
+    else if (parts[0] === "guideback") WizGuide.instance?.exitToMenu()
     else if (parts[0] === "pause") this.setPaused(true)
     else if (parts[0] === "unlock") this.unlockPlay()
     else if (parts[0] === "hand") this.menu.playHandDemo(arg !== "up")
@@ -227,7 +226,7 @@ export class WizMain extends BaseScriptComponent {
     else if (parts[0] === "step") this.skipStep()
     else if (parts[0] === "labauto") this.clab.autoWire(arg !== "one")
     else if (parts[0] === "labtest") this.clab.runTests()
-    else if (parts[0] === "labview") this.bench.setLabView(arg === "3d" ? "3d" : "diagram")
+    else if (parts[0] === "labview") this.bench.setLabView(arg === "3d" ? "3d" : arg === "diagram" ? "diagram" : "both")
     else if (parts[0] === "labasm") this.bench.assemble()
     else if (parts[0] === "place") this.placement.begin()
     else if (parts[0] === "placeok") this.placement.confirm()
@@ -237,6 +236,8 @@ export class WizMain extends BaseScriptComponent {
       this.phobo.say("Stuck? Tap a chip", 14)
       this.phobo.setChips([{id: "why", label: "Why?"}, {id: "next", label: "Next?"}, {id: "what", label: "What?"}], 14)
     } else if (parts[0] === "chipwhy") this.phoboAnswer("why")
+    else if (parts[0] === "cp") this.route.add(parseFloat(arg.split(",")[0]), parseFloat(arg.split(",")[1]))
+    else if (parts[0] === "routego") this.moveToggle("go", true)
     else if (parts[0] === "vizpower") this.vizBar.set("power", true), this.vizToggle("power", true)
     else if (parts[0] === "viztap") this.vizTap(arg)
     else if (parts[0] === "mood")this.phobo.react(arg as any, 8)
@@ -247,6 +248,8 @@ export class WizMain extends BaseScriptComponent {
 
   private headUI!: SceneObject
   private headYaw = 0
+  private headPitch = 0
+  private headFit = 1
   private headPos = new vec3(0, 0, 0)
   private headInit = false
 
@@ -268,24 +271,55 @@ export class WizMain extends BaseScriptComponent {
     const p = t.getWorldPosition()
     const dir = t.getWorldRotation().multiplyVec3(new vec3(0, 0, -1))
     const yawCam = Math.atan2(-dir.x, -dir.z)
+    const pitchCam = Math.max(-0.7, Math.min(0.45, Math.asin(Math.max(-1, Math.min(1, dir.y)))))
     if (!this.headInit) {
       this.headInit = true
       this.headPos = p
       this.headYaw = yawCam
+      this.headPitch = pitchCam
     }
+    // yaw and pitch: a small dead zone so the UI does not jitter with every head movement, then a quick ease-in once you look away
     let d = yawCam - this.headYaw
     while (d > Math.PI) d -= 2 * Math.PI
     while (d < -Math.PI) d += 2 * Math.PI
-    const dead = 0.22
-    if (Math.abs(d) > dead) this.headYaw += (d - Math.sign(d) * dead) * Math.min(1, dt * 4)
-    this.headPos = this.headPos.add(p.sub(this.headPos).uniformScale(Math.min(1, dt * 5)))
+    const dead = 0.12
+    if (Math.abs(d) > dead) this.headYaw += (d - Math.sign(d) * dead) * Math.min(1, dt * 7)
+    const dp = pitchCam - this.headPitch
+    if (Math.abs(dp) > dead) this.headPitch += (dp - Math.sign(dp) * dead) * Math.min(1, dt * 7)
+    // walking: it keeps up with you (faster the farther behind it is)
+    const lag = p.sub(this.headPos).length
+    this.headPos = this.headPos.add(p.sub(this.headPos).uniformScale(Math.min(1, dt * (6 + lag * 0.1))))
+    // narrow views (portrait panels): shrink the UI in x / y (not in depth) so every control stays inside the picture
+    const halfH = Math.tan(cam.fov / 2) * 54
+    const halfW = halfH * Math.max(0.3, cam.aspect)
+    const fit = Math.max(0.5, Math.min(1, halfW / 17, halfH / 19.5))
+    this.headFit += (fit - this.headFit) * Math.min(1, dt * 4)
     const ht = this.headUI.getTransform()
+    ht.setLocalScale(new vec3(this.headFit, this.headFit, 1))
     ht.setWorldPosition(this.headPos)
-    ht.setWorldRotation(quat.fromEulerVec(new vec3(0, this.headYaw, 0)))
+    const yawQ = quat.fromEulerVec(new vec3(0, this.headYaw, 0))
+    ht.setWorldRotation(yawQ.multiply(quat.fromEulerVec(new vec3(this.headPitch, 0, 0))))
+    // until the model is put on a table it stays with you too (it is only anchored once placed)
+    if (!this.placement.hasPlaced() && !this.placement.isPlacing()) {
+      const rt = this.sceneObject.getTransform()
+      // level, but raised or lowered with your pitch so it keeps the same place in your view when you look down at it
+      rt.setWorldPosition(this.headPos.add(new vec3(0, Math.tan(this.headPitch) * 58, 0)))
+      rt.setWorldRotation(yawQ)
+    }
   }
 
   private bind() {
     this.buildHeadUI()
+    // the Circuit Guide's MENU button comes back to this title screen
+    WizGuide.isTitle = () => this.mode === "launch"
+    WizGuide.onLegacy = (id) => {
+      this.menu.closeMenu("select")
+      this.onMenuSelect(id)
+    }
+    WizGuide.onExit = () => {
+      this.toLaunch()
+      this.menu.openAfter(0.8)
+    }
     this.menu.onSelect.add((id) => this.onMenuSelect(id))
     this.menu.onProject.add((id) => this.loadProject(id))
     this.robot.onPartSelected.add((id) => this.onPartSelected(id))
@@ -304,19 +338,51 @@ export class WizMain extends BaseScriptComponent {
     this.drive = new WizDrive(this.bench.getKit(), this.sceneObject, this.robot, this.clab, this.hud, this.bench.getKit().box, this.visualize.faceMat())
     this.phobo = new WizPhobo()
     this.uiAudio = makeAudio(this.sceneObject, 0.5)
+    this.motorAudio = makeAudio(this.sceneObject, 0.25)
+    this.motorAudio.audioTrack = SFX_MOTOR
     this.ar = new WizArView(this.bench.getKit(), this.robot)
-    this.vizBar = new WizVizBar(this.headUI, -15.4, [
+    this.vizBar = new WizVizBar(this.headUI, 13.2, [
       {id: "body", text: "BODY", on: true},
       {id: "wires", text: "WIRES", on: true},
       {id: "power", text: "POWER", on: false},
       {id: "explode", text: "EXPLODE", on: false},
     ])
     this.vizBar.onToggle = (id, on) => this.vizToggle(id, on)
+    this.route = new WizRoute(this.bench.getKit(), this.robot)
+    this.moveBar = new WizVizBar(this.headUI, 16.4, [
+      {id: "flag", text: "+ CHECKPOINT", on: false},
+      {id: "go", text: "GO", on: false, action: true},
+      {id: "clear", text: "CLEAR", on: false, action: true},
+    ])
+    this.moveBar.onToggle = (id, on) => this.moveToggle(id, on)
+    this.route.onGait = (moving) => this.routeGait(moving)
+    this.route.onReach = (n, total) => {
+      this.snd("ok")
+      void 0
+      this.phoboSay("Checkpoint " + n + " of " + total, "happy")
+    }
+    this.route.onDone = () => {
+      this.phoboSay("Route complete!", "wow")
+      void 0
+      this.robot.celebrate()
+    }
     this.inventory = new WizInventory(this.bench.getKit(), this.sceneObject, this.visualize)
     this.placement = new WizPlacement(this.bench.getKit(), this.sceneObject, new vec3(0, -12, -60))
+    this.placement.makeCursor(this.bench.getKit().box, this.visualize.faceMat())
+    this.createEvent("TouchStartEvent").bind((e: TouchStartEvent) => {
+      // a bare mouse click / tap (not on a button or part): a click on the table, or on the schematic sheet (zoom)
+      const uv = e.getTouchPosition()
+      this.later(0.12, () => {
+        if (uiPressedWithin(0.5)) return
+        const cam = mainCamera()
+        if (this.mode === "lab" && cam && this.bench.sheetClick(cam, uv)) return
+        this.placement.click()
+      })
+    })
     this.placement.onPlaced = () => {
+      this.snd("thunk")
       this.phoboSay("Placed! Grab the bar to move", "happy")
-      this.addXp(5)
+      void 0
     }
     this.phobo.attachFace(this.bench.getKit().box, this.visualize.faceMat())
     this.phobo.onChip = (id) => {
@@ -324,10 +390,10 @@ export class WizMain extends BaseScriptComponent {
       this.phoboAnswer(id)
     }
     this.phobo.onTap = () => this.snd("ping")
-    this.drive.onRing = () => this.addXp(10)
+    this.drive.onRing = () => void 0
     this.drive.onAllRings = () => {
-      this.giveBadge("driver")
-      this.addXp(30)
+      void 0
+      void 0
     }
     this.visualize.onChanged.add(() => this.refreshViz())
     this.visualize.onScrew.add((r) => this.onScrew(r))
@@ -362,6 +428,11 @@ export class WizMain extends BaseScriptComponent {
     this.visualize.setActive(false)
     this.inventory.show(false)
     this.vizBar.show(false)
+    this.moveBar.show(false)
+    this.route.stop()
+    this.route.show(false)
+    this.route.resetPose()
+    this.placement.endPoints()
     this.ar.end()
     this.robot.setScaleMul(1)
     this.robot.setPrintedHidden(false)
@@ -541,14 +612,18 @@ export class WizMain extends BaseScriptComponent {
     // Title: just Visualize and Library (Continue only when progress is saved). Every other scene: Upload, Play, Wire up, Back.
     if (this.mode === "launch") {
       if (this.saved) out.push({id: "continue", icon: "history"})
-      out.push({id: "visualize", icon: "view_in_ar", label: "Visualize"})
-      out.push({id: "projects", icon: "folder_open", label: "Library"})
+      // the three pages of the product (WizGuide.ts): VISUALIZE (attach real components to the 3D model), ANALYSE (tags + info), BUILD (the guide)
+      // The earlier Lab / Library / Visualize pages stay reachable from the page buttons.
+      out.push({id: "viz3d", icon: "view_in_ar", label: "Visualize"})
+      out.push({id: "analyse", icon: "visibility", label: "Analyse"})
+      out.push({id: "build", icon: "build", label: "Build"})
       return out
     }
     const myModel = PROJECT_PACK.identity.id === MY_MODEL_ID
     const hasLab = this.clab.available()
     const sim = hasLab && !this.clab.verifyMode()
     out.push({id: "upload", icon: "upload_file", label: "Upload"})
+    out.push({id: "place", icon: "touch_app", label: "Place"}) // bring the model to where you are looking and put it down again
     out.push(sim ? {id: "drive", icon: "play_arrow", label: "Play", state: "normal"} : {id: "play", icon: "play_arrow", label: "Play", state: this.mode === "test" ? "active" : "normal"})
     out.push({id: hasLab ? "lab" : "wires", icon: "flash_on", label: "Wire up"})
     if (myModel) {
@@ -560,15 +635,45 @@ export class WizMain extends BaseScriptComponent {
   }
 
   private refreshMenu() {
+    this.hud.setStatusVisible(this.mode !== "lab") // the Lab shows the sheet and the parts on the table: no bars over them
+    this.menu.setBig(this.mode === "launch") // the title menu (Lab / Circuit / Visualize / Library) is drawn larger
     if (this.mode === "lab" || this.mode === "drive") this.menu.setLift(0, -14.5)
+    else if (this.mode === "launch") this.menu.setLift(7.3, -10.5)
     else this.menu.setLift(0)
     this.menu.setItems(this.menuItems())
   }
 
   /** One UI sound: tap / ping (small reward) / ok (success) / error / spawn (new project). */
-  private snd(kind: "pick" | "ping" | "ok" | "error" | "spawn") {
+  private snd(kind: "pick" | "ping" | "ok" | "error" | "spawn" | "open" | "close" | "thunk" | "flag" | "zap" | "step" | "on" | "off" | "blip") {
     if (!this.uiAudio) return
-    sfx(this.uiAudio, kind === "pick" ? SFX_PICK : kind === "ping" ? SFX_PING : kind === "ok" ? SFX_OK : kind === "error" ? SFX_ERROR : SFX_SPAWN)
+    const t = {pick: SFX_PICK, ping: SFX_PING, ok: SFX_OK, error: SFX_ERROR, spawn: SFX_SPAWN, open: SFX_OPEN, close: SFX_CLOSE, thunk: SFX_THUNK, flag: SFX_FLAG, zap: SFX_ZAP, step: SFX_STEP, on: SFX_ON, off: SFX_OFF, blip: SFX_BLIP}[kind]
+    sfx(this.uiAudio, t)
+  }
+
+  /** Footsteps while a legged model walks the route, a motor hum (looping) while a wheeled one drives; menu whoosh when it opens or closes. */
+  private soundscape(dt: number) {
+    const open = this.menu.isOpen()
+    if (open !== this.menuWasOpen) {
+      this.menuWasOpen = open
+      this.snd(open ? "open" : "close")
+    }
+    const moving = this.route.isRunning()
+    const wheels = WizRoute.kind() === "wheels"
+    if (moving && !wheels) {
+      this.stepT -= dt
+      if (this.stepT <= 0) {
+        this.stepT = 0.38
+        sfx(this.motorAudio, SFX_STEP)
+      }
+    }
+    const wantMotor = moving && wheels
+    if (wantMotor !== this.motorOn) {
+      this.motorOn = wantMotor
+      if (wantMotor) {
+        this.motorAudio.audioTrack = SFX_MOTOR
+        this.motorAudio.play(-1)
+      } else this.motorAudio.stop(true)
+    }
   }
 
   private onMenuSelect(id: string) {
@@ -588,6 +693,12 @@ export class WizMain extends BaseScriptComponent {
     if (id === "lab") {
       this.menu.closeMenu("select")
       this.enterMode("lab")
+      return
+    }
+    if (id === "guide" || id === "build" || id === "viz3d" || id === "analyse") {
+      this.menu.closeMenu("select")
+      const g = WizGuide.instance
+      if (g !== null) g.enterFromMenu(id === "viz3d" ? "viz" : id === "analyse" ? "analyse" : "build")
       return
     }
     if (id === "drive") {
@@ -613,7 +724,7 @@ export class WizMain extends BaseScriptComponent {
         this.clab.clearAll()
         return
       } else if (id === "view3d") {
-        this.bench.setLabView(this.bench.labViewMode() === "3d" ? "diagram" : "3d")
+        this.bench.setLabView(this.bench.labViewMode() === "both" ? "3d" : this.bench.labViewMode() === "3d" ? "diagram" : "both")
         this.refreshMenu()
         return
       } else if (id === "assemble") {
@@ -625,7 +736,7 @@ export class WizMain extends BaseScriptComponent {
     }
     if (id === "projects") {
       this.menu.closeMenu("select")
-      if (this.xp > 0) this.saveSession() // the Library is where progress is kept: save on the way in
+      if (this.step > 0 || this.buildComplete) this.saveSession() // the Library is where progress is kept: save on the way in
       this.showProjects()
       return
     }
@@ -747,7 +858,7 @@ export class WizMain extends BaseScriptComponent {
     this.buildComplete = false
     this.playUnlocked = false
     this.questMistakes = [0, 0, 0, 0]
-    this.questStars = [0, 0, 0, 0]
+    this.petCelebrated = false
     this.snaps = 0
     this.demoSeen = false
     this.exploded = false
@@ -807,9 +918,6 @@ export class WizMain extends BaseScriptComponent {
       buildConnected: this.buildConnected,
       buildComplete: this.buildComplete,
       playUnlocked: this.playUnlocked,
-      xp: this.xp,
-      badges: this.badges,
-      stars: this.questStars,
       mistakes: this.questMistakes,
       connected: this.connectedIds(),
       viz: this.visualize.serialize(),
@@ -845,10 +953,7 @@ export class WizMain extends BaseScriptComponent {
     const d = this.saveCache
     if (!d) return
     if (d.project && d.project !== PROJECT_PACK.identity.id) this.loadProject(d.project as string, d.template as string)
-    this.xp = d.xp ? d.xp : 0
-    this.lastLevel = Math.floor(this.xp / 60) + 1 // a loaded save does not replay the level-up
-    this.badges = d.badges ? d.badges : []
-    this.questStars = d.stars ? d.stars : [0, 0, 0, 0]
+    // older saves may carry xp / badges / stars fields: they are ignored
     this.questMistakes = d.mistakes ? d.mistakes : [0, 0, 0, 0]
     this.buildComplete = !!d.buildComplete
     this.playUnlocked = !!d.playUnlocked
@@ -879,43 +984,9 @@ export class WizMain extends BaseScriptComponent {
     this.hud.toast("continue", new vec4(0.35, 1.0, 1.0, 1))
   }
 
-  // ------------------------------------------------------------- game layer: XP, stars, badges, HUD
-  private addXp(n: number) {
-    this.idleT = 0
-    this.xp += n
-    this.snd("ping")
-    this.hud.toast("+" + n)
-    this.refreshHudGame()
-  }
-
-  private giveBadge(id: string) {
-    if (this.badges.indexOf(id) >= 0) return
-    this.badges.push(id)
-    this.snd("ok")
-    this.hud.toast("badge", new vec4(1.0, 0.85, 0.25, 1))
-    this.refreshHudGame()
-  }
-
-  private lastLevel = 1
-
-  private refreshHudGame() {
-    const per = 60
-    const lv = Math.floor(this.xp / per) + 1
-    if (lv > this.lastLevel) {
-      // level-up moment: fanfare, Phobo celebrates (never on load / project switch, where the level only syncs)
-      this.snd("ok")
-      this.phoboSay("Level " + lv + "!", "wow")
-      this.hud.toast("Lv " + lv, new vec4(1.0, 0.85, 0.25, 1))
-    }
-    this.lastLevel = lv
-    this.hud.setXp((this.xp % per) / per, Math.floor(this.xp / per) + 1)
-    let stars = 0
-    for (let i = 0; i < this.questStars.length; i++) stars += this.questStars[i]
-    this.hud.setStars(Math.min(3, Math.floor(stars / 4)))
-    const cols: RGBA[] = []
-    for (let i = 0; i < BADGES.length; i++) if (this.badges.indexOf(BADGES[i].id) >= 0) cols.push(BADGES[i].color)
-    this.hud.setBadges(cols)
-  }
+  // ------------------------------------------------------------- HUD (the level / XP / star / badge system was removed)
+  /** Kept as a hook for the idle timer: actions that used to award XP still count as activity. */
+  private refreshHudGame() {}
 
   // ------------------------------------------------------------- AR view (overview)
   private onPull(dir: number) {
@@ -935,36 +1006,83 @@ export class WizMain extends BaseScriptComponent {
   private beginModelView() {
     this.robot.setDimsVisible(false)
     this.robot.setCoverVisible(false) // lid off: the circuit inside is in view
-    // table-top scale: the model longest side about 18 cm, so it sits on the table at a readable size and still fits the view
+    // table-top scale: the model longest side about 22 cm, so it sits on the table at a readable size and still fits the view
     const dims = this.robot.robotDimsCm()
     const longest = Math.max(dims[0], dims[1], dims[2], 1)
-    this.robot.setScaleMul(Math.max(0.4, Math.min(2.2, 18 / longest)))
+    this.robot.setScaleMul(Math.max(0.4, Math.min(2.2, 22 / longest)))
     this.robot.setPrintedXray(true) // see-through body: the circuit inside is the subject
     this.ar.begin()
     this.vizBar.reset(["body", "wires"])
     this.vizBar.show(true)
+    this.moveBar.reset([])
+    this.moveBar.show(this.route.canMove())
+    this.route.show(true)
     this.hud.setLabel("")
     this.hud.setPips([])
     // first time here: put the model on a surface (look at the table, pinch). Later visits keep the model where it was placed.
     if (!this.placement.hasPlaced() && !this.placement.isPlacing()) {
       const d = PROJECT_PACK.placement.desk
       this.placement.setDesk(new vec3(d[0], d[1], d[2]))
-      this.placement.begin()
-      this.phoboSay("Look at a table, then pinch", "think")
+      // the preview's view point looks level: the old "look down at the table, then pinch" put the model 39 cm below the frame.
+      // It now starts on the table in view; the Place icon in the menu still lets you move it.
+      this.placement.placeDefault()
+      this.phoboSay("Your model is on the table. Tap a part", "happy")
     }
   }
 
   private vizToggle(id: string, on: boolean) {
-    this.snd("pick")
+    this.snd(id === "power" && on ? "zap" : on ? "on" : "off")
     if (id === "body") this.robot.setPrintedHidden(!on)
     else if (id === "wires") this.ar.setWires(on)
     else if (id === "power") {
       this.ar.setPower(on)
       if (on) {
-        this.addXp(5)
+        void 0
         this.phoboSay("Power flows through the wires", "wow")
       }
     } else if (id === "explode") this.robot.setExploded(on)
+  }
+
+  private moveToggle(id: string, on: boolean) {
+    this.snd(id === "flag" ? (on ? "on" : "off") : id === "go" ? "open" : "close")
+    if (id === "flag") {
+      if (!on) {
+        this.placement.endPoints()
+        return
+      }
+      if (this.placement.isPlacing()) {
+        this.moveBar.set("flag", false)
+        this.phoboSay("Place the model first", "think")
+        return
+      }
+      this.placement.onPoint = (w) => {
+        if (this.route.addWorld(w)) this.snd("flag")
+        else this.phoboSay("That is enough checkpoints", "think")
+      }
+      this.placement.beginPoints()
+      this.phoboSay("Aim, then click to drop a flag", "happy")
+    } else if (id === "go") {
+      if (this.route.count() === 0) {
+        this.phoboSay("Add a checkpoint first", "think")
+        return
+      }
+      this.moveBar.set("flag", false)
+      this.placement.endPoints()
+      this.vizBar.set("power", true)
+      this.vizToggle("power", true)
+      this.route.go()
+    } else if (id === "clear") {
+      this.route.clear()
+      this.route.resetPose()
+      this.moveBar.set("flag", false)
+      this.placement.endPoints()
+    }
+  }
+
+  /** The gait while the route runs: the legged robot keeps walking (its own walk command), wheels are turned by WizRoute. */
+  private routeGait(moving: boolean) {
+    if (WizRoute.kind() !== "legs") return
+    if (moving && !this.lab.running) this.lab.run("walk")
   }
 
   /** Tap a part: it lights up with its wires; tap it again to clear. */
@@ -1079,7 +1197,7 @@ export class WizMain extends BaseScriptComponent {
       const was = this.validator.isSelected(id)
       this.validator.toggle(id)
       if (!was) {
-        this.addXp(5)
+        void 0
         this.snaps++
       }
       const nxt = this.nextUnconnected(id)
@@ -1088,7 +1206,7 @@ export class WizMain extends BaseScriptComponent {
       else {
         this.refreshCircuit()
         if (this.validator.report().status === "COMPLETE") {
-          this.giveBadge("wired")
+          void 0
           this.hud.toast("19/19", new vec4(0.3, 1.0, 0.5, 1))
           this.robot.celebrate()
         }
@@ -1113,13 +1231,8 @@ export class WizMain extends BaseScriptComponent {
     for (let i = 0; i < steps.length; i++) states.push(i < this.step || (i === this.step && this.buildComplete) ? 1 : i === this.step ? 2 : 0)
     this.hud.setPips(states)
     const s = steps[Math.min(this.step, steps.length - 1)]
-    const q = questOf(s.id)
     this.hud.setLabel(BUILD_PLAN[s.id].title + "  " + (this.step + 1) + "/" + steps.length)
-    let done = 0
-    for (let k = 0; k <= q; k++) done += this.questStars[k] > 0 ? 1 : 0
-    this.hud.setStars(Math.min(3, this.questStars.reduce((a, b) => a + b, 0) >= 9 ? 3 : Math.floor(this.questStars.reduce((a, b) => a + b, 0) / 3)))
     this.hudLine = BUILD_PLAN[s.id].title
-    void done
   }
 
   private applyStep() {
@@ -1180,8 +1293,8 @@ export class WizMain extends BaseScriptComponent {
     this.robot.setPartStyle(id, "normal")
     this.hud.hideInfo()
     this.snaps++
-    this.addXp(10)
-    if (this.snaps === 1) this.giveBadge("first")
+    void 0
+    if (this.snaps === 1) void 0
     this.completeStep()
   }
 
@@ -1198,7 +1311,7 @@ export class WizMain extends BaseScriptComponent {
     if (s.wires.indexOf(id) < 0) return
     if (this.buildConnected.indexOf(id) < 0) {
       this.buildConnected.push(id)
-      this.addXp(5)
+      void 0
     }
     this.bench.setConnected(this.buildConnected)
     const next = this.nextBuildWire()
@@ -1213,10 +1326,6 @@ export class WizMain extends BaseScriptComponent {
     const q = questOf(steps[cur].id)
     const last = QUESTS[q].steps[QUESTS[q].steps.length - 1] === steps[cur].id
     if (last) {
-      const m = this.questMistakes[q]
-      this.questStars[q] = m === 0 ? 3 : m <= 2 ? 2 : 1
-      this.addXp(15)
-      if (this.questStars[q] === 3) this.giveBadge("clean")
     }
     this.hud.setPips(this.pipStatesAfter(cur))
     this.later(0.9, () => {
@@ -1265,7 +1374,7 @@ export class WizMain extends BaseScriptComponent {
     this.robot.setPartsInteractive(true)
     this.robot.setFace(this.faceFor("done"), "once")
     this.robot.celebrate()
-    this.giveBadge("builder")
+    void 0
     this.unlockPlay()
     const n = PROJECT_PACK.steps.length
     this.step = n - 1
@@ -1302,16 +1411,12 @@ export class WizMain extends BaseScriptComponent {
     this.hud.setLabel(fc.count + "/" + fc.total)
     const r = this.visualize.testResults()
     this.hud.setResults(r === null ? null : [r.power, r.data, r.servo])
-    if (fc.count === fc.total && fc.total > 0 && this.badges.indexOf("fit") < 0) {
-      this.giveBadge("fit")
-      this.addXp(10)
-    }
   }
 
   private onScrew(reason: string) {
     if (reason === "ok") {
-      this.addXp(10)
-      this.giveBadge("screw")
+      void 0
+      void 0
       this.hud.toast("ok", new vec4(0.3, 1.0, 0.5, 1))
     } else this.hud.toast(reason, new vec4(1.0, 0.3, 0.25, 1))
     this.refreshViz()
@@ -1339,9 +1444,8 @@ export class WizMain extends BaseScriptComponent {
       this.phoboSay(n + " of " + inputs.length + " inputs tested", "happy")
       return
     }
-    if (this.badges.indexOf("pet") < 0) {
-      this.giveBadge("pet")
-      this.addXp(30)
+    if (!this.petCelebrated) {
+      this.petCelebrated = true
       this.phoboSay("Pet activated!", "wow")
       this.robot.celebrate()
     }
@@ -1355,6 +1459,7 @@ export class WizMain extends BaseScriptComponent {
   private phoboSay(text: string, mood: "idle" | "happy" | "think" | "worried" | "wow" | "sleep" | "go" = "think") {
     if (mood === "worried") this.snd("error")
     else if (mood === "wow") this.snd("ok")
+    if (mood !== "worried" && mood !== "wow") this.snd("blip")
     this.phobo.say(text, 5)
     this.phobo.react(mood, 2.5)
   }
@@ -1423,6 +1528,9 @@ export class WizMain extends BaseScriptComponent {
     this.placement.update(dt)
     this.inventory.update(dt)
     this.ar.update(dt)
+    this.route.update(dt)
+    this.soundscape(dt)
+    if (this.route.isRunning()) this.lab.tick(dt)
     this.updateHeadUI(dt)
     if (this.mode === "lab" || this.mode === "build" || this.mode === "visualize" || this.mode === "circuit") {
       if (!this.phobo.speaking()) this.idleT += dt
@@ -1443,7 +1551,7 @@ export class WizMain extends BaseScriptComponent {
 
   // ------------------------------------------------------------- inspection (LEAF tests / debugging)
   driveState(): {[k: string]: any} {
-    return {...this.drive.debug(), xp: this.xp, badges: this.badges.slice()}
+    return {...this.drive.debug()}
   }
 
   /** Test hooks: the AR view's wires and which layers are on. */
@@ -1453,6 +1561,10 @@ export class WizMain extends BaseScriptComponent {
 
   arPower(): boolean {
     return this.ar.isPower()
+  }
+
+  routeControl(): WizRoute {
+    return this.route
   }
 
   vizBarControl(): WizVizBar {
@@ -1492,9 +1604,6 @@ export class WizMain extends BaseScriptComponent {
       playUnlocked: this.playUnlocked,
       paused: this.paused,
       saved: this.saved,
-      xp: this.xp,
-      badges: this.badges.slice(),
-      stars: this.questStars.slice(),
       hudLabel: this.hud.labelText(),
       labFace: this.lab.face,
       labCommand: this.lab.lastCommand,

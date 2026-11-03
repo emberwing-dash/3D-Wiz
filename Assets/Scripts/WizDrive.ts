@@ -2,7 +2,7 @@
 // right, lights). What each one does is not scripted: WizCircuitLab.driveMap() searches the user's wiring by simulation for the GPIO /
 // shift-register states that spin the motor each way, move the servo and light the LEDs, and the pad replays exactly those states. A button
 // whose function the wiring does not provide turns red and says why in a few words. The car moves from the motor's simulated spin and the
-// servo's steering; collect the rings for XP.
+// servo's steering; collect the rings.
 // Owns: the pad, the car kinematics on the desk, headlights, rings. Must not: edit wires, decide modes or menus (WizMain does).
 // The simulation is a simplified DC model: driving here is virtual and does not prove a physical car works.
 

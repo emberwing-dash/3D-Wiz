@@ -64,7 +64,7 @@
     - '// @input AssignableType_2 bench {"hint":"Tinkercad-style circuit bench"}'
     - '// @input AssignableType_3 visualize {"hint":"VISUALIZE workbench"}'
     - '// @input AssignableType_4 menu {"hint":"Title screen + SAO icon menu"}'
-    - '// @input AssignableType_5 hud {"hint":"Tiny HUD (pips, XP, badges, i card)"}'
+    - '// @input AssignableType_5 hud {"hint":"Tiny HUD (pips, i card)"}'
     - '// @ui {"widget":"group_end"}'
     - '// @ui {"widget":"separator"}'
     - '// @ui {"widget":"group_start", "label":"Settings"}'

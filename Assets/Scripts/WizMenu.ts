@@ -89,6 +89,11 @@ export class WizMenu extends BaseScriptComponent {
   private wantOpen: boolean = false
   // Spectacles sizing (z ~ 54 cm: view is ~23 x 38 cm): icon hit box >= 2 cm, >= 1 cm between hit boxes, <= 7 icons per page,
   // stack kept inside the view.
+  /** Title menu: icons, words and hit boxes are drawn larger (1 = the in-scene size). */
+  private bigK = 1
+  setBig(on: boolean): void {
+    this.bigK = on ? 1.15 : 1
+  }
   private anchor = new vec3(MENU_X, ICON_ANCHOR_Y, MENU_Z)
   private anchorCur = new vec3(MENU_X, ICON_ANCHOR_Y, MENU_Z)
   // the Circuit lab bench fills the lower view; the stack moves up so no icon collider sits in front of a bench part
@@ -261,8 +266,9 @@ export class WizMenu extends BaseScriptComponent {
       this.hideRoot.enabled = false
       this.graveyard.push({obj: this.hideRoot, at: this.clock + 1.0})
     }
-    const y = ((n - 1) / 2 + 1) * ICON_PITCH + 0.1
+    const y = ((n - 1) / 2) * ICON_PITCH * this.bigK + (this.bigK > 1 ? 3.0 : ICON_PITCH + 0.1)
     const root = this.kit.obj(this.stack, "menu_hide", [0, y, 0])
+    root.getTransform().setLocalScale(new vec3(this.bigK, this.bigK, this.bigK))
     this.kit.shape(root, "cyl", [0, 0, -0.05], [2.0, 0.1, 2.0], [0.35, 0.95, 1.0, 1], "ring", false, [90, 0, 0])
     this.kit.shape(root, "cyl", [0, 0, 0], [1.8, 0.2, 1.8], [0.05, 0.1, 0.16, 1], "disc", false, [90, 0, 0])
     const q = makeIconQuad(root, this.boxMesh, this.faceMaterial, "icon", "arrow_upward", 1.1, [1, 1, 1, 1])
@@ -299,7 +305,7 @@ export class WizMenu extends BaseScriptComponent {
     }
     this.items = []
     const n = list.length
-    const gap = ICON_PITCH
+    const gap = ICON_PITCH * this.bigK
     const always = n <= 5 // a short menu shows every word next to its icon (long ones show it on hover)
     for (let i = 0; i < n; i++) {
       const def = list[i]
@@ -477,7 +483,7 @@ export class WizMenu extends BaseScriptComponent {
       this.tab.enabled = show
       if (show) {
         const n = Math.max(1, this.items.length)
-        const ty = ((n - 1) / 2 + 1) * ICON_PITCH + 0.1
+        const ty = ((n - 1) / 2) * ICON_PITCH * this.bigK + (this.bigK > 1 ? 3.0 : ICON_PITCH + 0.1)
         this.tab.getTransform().setWorldPosition(toWorld(this.tab, new vec3(this.anchorCur.x, this.anchorCur.y + ty, this.anchorCur.z)))
       }
     }
@@ -503,7 +509,8 @@ export class WizMenu extends BaseScriptComponent {
       if (it.pop > 0) it.pop = Math.max(0, it.pop - dt)
       const s = ease * (it.hover ? 1.18 : 1) * (1 + (it.pop > 0 ? 0.35 * (it.pop / 0.28) : 0))
       it.scale = s
-      it.root.getTransform().setLocalScale(new vec3(Math.max(0.001, s), Math.max(0.001, s), Math.max(0.001, s)))
+      const sk = Math.max(0.001, s * this.bigK)
+      it.root.getTransform().setLocalScale(new vec3(sk, sk, sk))
     }
   }
 }

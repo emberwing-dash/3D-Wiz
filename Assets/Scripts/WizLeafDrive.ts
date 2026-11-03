@@ -82,16 +82,13 @@ export class WizLeafDrive extends Scenario {
     await press(it, "drvhit_lights", 500)
     expect(main.driveState().lit < 0.05).toBe(true)
 
-    // rings -> XP + badge
-    const xp0 = main.driveState().xp
+    // rings
     for (let i = 0; i < 3; i++) {
       const r = ctl.ringPos(i)
       ctl.teleport(r.x, r.z)
       await sleep(250)
     }
     expect(main.driveState().got).toBe(3)
-    check(main.driveState().xp >= xp0 + 40, "rings give XP: " + (main.driveState().xp - xp0))
-    check(main.driveState().badges.indexOf("driver") >= 0, "the driver badge is awarded")
 
     // break the motor driver wire: forward / reverse stop being available and say why
     main.enterMode("lab")

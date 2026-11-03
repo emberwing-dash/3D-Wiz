@@ -53,7 +53,7 @@
     -
       {}
   InputLines:
-    - '// @ui {"widget":"label", "label":"<span style=\"color: #60A5FA;\">WizHud - pips, XP, badges, \"i\" card</span>"}'
+    - '// @ui {"widget":"label", "label":"<span style=\"color: #60A5FA;\">WizHud - pips, \"i\" card</span>"}'
     - '// @ui {"widget":"separator"}'
     - '// @ui {"widget":"group_start", "label":"References"}'
     - '// @input Asset.RenderMesh boxMesh {"hint":"Unit cube mesh (1 cm)"}'

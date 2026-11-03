@@ -1,4 +1,4 @@
-// WizHud.ts - the tiny game HUD: part/quest label, progress pips, XP bar + level + stars, badges, result icons, floating
+// WizHud.ts - the tiny HUD: part/quest label, progress pips, result icons, floating
 //             "+10" toasts, a "virtual" chip and the optional "i" card (name, one short line, real size).
 // Owns: floating Text/shape objects only. No paragraphs: icons, colours, numbers. State is pushed in by WizMain.
 // Must not: decide anything (no game rules) or create buttons.
@@ -12,7 +12,7 @@ const PIP_MAX = 24
 
 @component
 export class WizHud extends BaseScriptComponent {
-  @ui.label('<span style="color: #60A5FA;">WizHud - pips, XP, badges, "i" card</span>')
+  @ui.label('<span style="color: #60A5FA;">WizHud - pips, "i" card</span>')
   @ui.separator
   @ui.group_start("References")
   @input
@@ -38,11 +38,6 @@ export class WizHud extends BaseScriptComponent {
   private kit!: PartKit
   private label!: Text
   private pips: {obj: SceneObject; sm: StyledMat}[] = []
-  private xpFill!: SceneObject
-  private xpFillSm!: StyledMat
-  private lvText!: Text
-  private stars: StyledMat[] = []
-  private badgeObjs: {obj: SceneObject; sm: StyledMat}[] = []
   private chip!: Text
   private infoRoot!: SceneObject
   private infoTitle!: Text
@@ -55,6 +50,7 @@ export class WizHud extends BaseScriptComponent {
   private paused: boolean = false
   private pipCount: number = 0
   private dimObj!: SceneObject
+  private status!: SceneObject
 
   onAwake() {
     try {
@@ -66,20 +62,14 @@ export class WizHud extends BaseScriptComponent {
         r.obj.enabled = false
         this.pips.push({obj: r.obj, sm: r.sm})
       }
-      // XP bar (track + fill), level number, stars
-      this.kit.shape(root, "box", [0, 2.6, 0], [10, 0.3, 0.1], [0.15, 0.2, 0.25, 1], "xpTrack", false)
-      const f = this.kit.shape(root, "box", [-5, 2.6, 0.05], [0.01, 0.3, 0.12], [0.35, 1.0, 1.0, 1], "xpFill", false)
-      this.xpFill = f.obj
-      this.xpFillSm = f.sm
-      this.lvText = makeLabel(root, "HudLevel", "", 34, [-6.6, 2.6, 0], LABEL_COLOR)
-      for (let i = 0; i < 3; i++) {
-        const st = this.kit.shape(root, "box", [6.4 + i * 0.9, 2.6, 0], [0.55, 0.55, 0.1], [0.3, 0.3, 0.3, 1], "star" + i, false, [0, 0, 45])
-        this.stars.push(st.sm)
-      }
-      for (let i = 0; i < 6; i++) {
-        const b = this.kit.shape(root, "sphere", [13.2 - i * 1.0, 5.4, 0], [0.7, 0.7, 0.2], [0.35, 0.35, 0.4, 1], "badge" + i, false)
-        b.obj.enabled = false
-        this.badgeObjs.push({obj: b.obj, sm: b.sm})
+      // the status group (label, pips) can be hidden as one (the Lab needs the whole view for the sheet)
+      this.status = this.kit.obj(root, "HudStatus")
+      const group: SceneObject[] = [this.label.getSceneObject()]
+      for (const p of this.pips) group.push(p.obj)
+      for (const o of group) {
+        const w = o.getTransform().getWorldPosition()
+        o.setParent(this.status)
+        o.getTransform().setWorldPosition(w)
       }
       this.chip = makeLabel(root, "HudChip", "", 26, [12.4, -28.2, 0], new vec4(0.7, 0.85, 0.95, 0.6))
       // "i" card
@@ -109,6 +99,11 @@ export class WizHud extends BaseScriptComponent {
       print("[WizHud] build failed: " + e + " " + (e && (e as any).stack ? (e as any).stack : ""))
     }
     this.createEvent("UpdateEvent").bind(() => this.update(this.paused ? 0 : getDeltaTime()))
+  }
+
+  /** Show or hide the label and pips (toasts and the info card stay). */
+  setStatusVisible(on: boolean) {
+    if (this.status && !isNull(this.status)) this.status.enabled = on
   }
 
   setPaused(on: boolean) {
@@ -152,24 +147,6 @@ export class WizHud extends BaseScriptComponent {
 
   pipStates(): number {
     return this.pipCount
-  }
-
-  setXp(frac: number, level: number) {
-    const f = Math.max(0.01, Math.min(1, frac))
-    this.xpFill.getTransform().setLocalScale(new vec3(10 * f, 0.3, 0.12))
-    this.xpFill.getTransform().setLocalPosition(new vec3(-5 + 5 * f, 2.6, 0.05))
-    this.lvText.text = "Lv " + level
-  }
-
-  setStars(n: number) {
-    for (let i = 0; i < 3; i++) this.stars[i].set(i < n ? [1.0, 0.85, 0.25, 1] : [0.3, 0.3, 0.3, 1])
-  }
-
-  setBadges(colors: RGBA[]) {
-    for (let i = 0; i < this.badgeObjs.length; i++) {
-      this.badgeObjs[i].obj.enabled = i < colors.length
-      if (i < colors.length) this.badgeObjs[i].sm.set(colors[i])
-    }
   }
 
   setChip(text: string) {

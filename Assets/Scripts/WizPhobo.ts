@@ -13,7 +13,7 @@ const OUT_ANGLE = 38 // degrees off the view centre before Phobo swings back int
 import {makeInteractable} from "./WizInteract"
 import {WizPhoboFace, FaceMood} from "./WizPhoboFace"
 import {makeLabel, LABEL_ACCENT} from "./WizLabelsUI"
-import {rrect, uiText, COLOR_SLOT, COLOR_TEXT, FONT_SEMIBOLD, pop} from "./WizUI"
+import {rrect, Rrect, uiText, COLOR_SLOT, COLOR_TEXT, FONT_SEMIBOLD, pop} from "./WizUI"
 import {CancelSet} from "SpectaclesInteractionKit.lspkg/Utils/animate"
 
 export type PhoboMood = FaceMood
@@ -34,6 +34,7 @@ export class WizPhobo {
   private moodT = 0
   private bubble: SceneObject | null = null
   private bubbleText: Text | null = null
+  private bubbleBg: Rrect | null = null
   private bubbleT = 0
   onTap: () => void = () => {}
   onChip: (id: string) => void = () => {}
@@ -84,7 +85,8 @@ export class WizPhobo {
     const b = global.scene.createSceneObject("PhoboBubble")
     b.setParent(this.root)
     b.getTransform().setLocalPosition(new vec3(-4.5, -4.2, 0.3)) // below-left of the head: stays inside the narrow view
-    this.bubbleText = makeLabel(b, "bubbleText", "", 26, [0, 0, 0.1], new vec4(0.85, 1, 1, 1))
+    this.bubbleBg = rrect(b, "bubbleBg", 6, 1.7, 0.85, [0.03, 0.05, 0.09, 0.97], -0.05, {size: 0.06, color: [0.35, 0.9, 1.0, 0.85]})
+    this.bubbleText = makeLabel(b, "bubbleText", "", 27, [0, 0, 0.1], new vec4(1, 1, 1, 1))
     this.bubble = b
     b.enabled = false
   }
@@ -143,6 +145,7 @@ export class WizPhobo {
   say(text: string, seconds: number = 5) {
     if (!this.bubble || !this.bubbleText) return
     this.bubbleText.text = text
+    if (this.bubbleBg) this.bubbleBg.rr.size = new vec2(Math.max(3.2, text.length * 0.31 + 1.7), 1.7) // a dark plate behind the words: readable on any background
     this.bubble.enabled = text !== ""
     this.bubbleT = seconds
     if (text !== "") this.react("think", Math.min(seconds, 1.6))

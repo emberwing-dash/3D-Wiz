@@ -15,12 +15,20 @@ const DEG = Math.PI / 180
 const ROW = 0.95 // pin row pitch (cm)
 const GAP_W = 2.8 // routing channel between two symbol columns
 const LANE = 0.34
+// KiCad look: cream paper, pale-yellow symbol bodies, dark-red outlines, teal pin names, coloured nets (dark inks, readable on the bright sheet and on additive glasses)
+const PAPER: RGBA = [1.0, 0.99, 0.92, 1]
+const SYM_FILL: RGBA = [1.0, 1.0, 0.8, 1]
+const SHEET_LINE: RGBA = [0.55, 0.1, 0.1, 1]
+const GRID_LINE: RGBA = [0.86, 0.84, 0.74, 1]
+const PIN_TEXT = new vec4(0.0, 0.4, 0.45, 1)
+const BODY_TEXT = new vec4(0.12, 0.05, 0.05, 1)
+const ink = (c: RGBA): RGBA => [c[0] * 0.58, c[1] * 0.58, c[2] * 0.58, 1]
 const ROLE_COLOR: {[r: string]: RGBA} = {
-  power: [1.0, 0.35, 0.3, 1],
-  ground: [0.45, 0.55, 0.75, 1],
-  signal: [1.0, 0.85, 0.3, 1],
-  out: [0.4, 0.95, 0.55, 1],
-  io: [0.45, 0.85, 1.0, 1],
+  power: [0.8, 0.05, 0.05, 1],
+  ground: [0.05, 0.2, 0.7, 1],
+  signal: [0.5, 0.36, 0.0, 1],
+  out: [0.0, 0.5, 0.15, 1],
+  io: [0.0, 0.4, 0.55, 1],
 }
 const KIND_COLOR: {[k: string]: RGBA} = {
   battery: [1.0, 0.45, 0.35, 1],
@@ -105,6 +113,7 @@ export class WizSchematic {
     this.kit = kit
     this.root = kit.obj(parent, "Schematic", [0, 3.5, 4])
     this.build()
+    this.drawPaper()
     this.root.enabled = false
     this.fit(22, 26, -3, 1.5)
   }
@@ -123,6 +132,79 @@ export class WizSchematic {
     rmv.mesh = kind === "box" ? this.kit.box : this.kit.sphere
     rmv.mainMaterial = (own ? own : this.mat(color)).mat
     return o
+  }
+
+  /** Dark text on the cream sheet, no outline (an outline smears small text on light paper). */
+  private inkText(parent: SceneObject, name: string, text: string, size: number, pos: [number, number, number], color: vec4): Text {
+    const t = makeLabel(parent, name, text, size, pos, color)
+    t.outlineSettings.enabled = false
+    t.depthTest = true
+    return t
+  }
+
+  /** The sheet: cream paper, a KiCad grid, a red frame and a title block bottom-right. Opaque, so the diagram reads on any background. */
+  private drawPaper() {
+    const e = this.extent()
+    const w = e.w + 3
+    const h = e.h + 3
+    const cx = 0
+    const mid = (this.top + this.bottom) / 2
+    this.paperW = w
+    this.paperH = h
+    this.paperMid = mid
+    const back = this.kit.obj(this.root, "Sheet", [cx, mid, -0.25])
+    this.sh(back, "box", [0, 0, 0], [w, h, 0.08], PAPER, "paper")
+    for (let gx = -Math.floor(w / 4); gx <= Math.floor(w / 4); gx++) this.sh(back, "box", [gx * 2, 0, 0.05], [0.04, h, 0.02], GRID_LINE, "gx" + gx)
+    for (let gy = -Math.floor(h / 4); gy <= Math.floor(h / 4); gy++) this.sh(back, "box", [0, gy * 2, 0.05], [w, 0.04, 0.02], GRID_LINE, "gy" + gy)
+    const f = 0.16
+    this.sh(back, "box", [0, h / 2 - 0.2, 0.08], [w - 0.4, f, 0.03], SHEET_LINE, "ft")
+    this.sh(back, "box", [0, -h / 2 + 0.2, 0.08], [w - 0.4, f, 0.03], SHEET_LINE, "fb")
+    this.sh(back, "box", [-w / 2 + 0.2, 0, 0.08], [f, h - 0.4, 0.03], SHEET_LINE, "fl")
+    this.sh(back, "box", [w / 2 - 0.2, 0, 0.08], [f, h - 0.4, 0.03], SHEET_LINE, "fr")
+    // tap the sheet: zoom in on that spot (tap again to fit the whole sheet); drag while zoomed to pan
+    const hit = this.kit.obj(back, "sheet_hit", [0, 0, 0.0])
+    const col = hit.createComponent("Physics.ColliderComponent") as ColliderComponent
+    const hb = Shape.createBoxShape()
+    hb.size = new vec3(w, h, 0.4)
+    col.shape = hb
+    const it = makeInteractable(hit)
+    it.targetingMode = 3
+    let hitLocal = new vec2(0, 0)
+    let moved = 0
+    it.onTriggerStart.add((e: any) => {
+      moved = 0
+      try {
+        const hp = e.interactor.targetHitInfo.hit.position as vec3
+        const l = this.root.getTransform().getInvertedWorldTransform().multiplyPoint(hp)
+        hitLocal = new vec2(l.x, l.y)
+      } catch (err) {
+        hitLocal = new vec2(0, mid)
+      }
+    })
+    it.onDragUpdate.add((e: any) => {
+      if (!this.zoomed || !e.dragVector) return
+      const dv = e.dragVector as vec3
+      moved += Math.abs(dv.x) + Math.abs(dv.y)
+      const par = this.root.hasParent() ? this.root.getParent().getTransform().getInvertedWorldTransform() : null
+      const p = this.root.getTransform().getLocalPosition()
+      this.root.getTransform().setLocalPosition(new vec3(this.panBase.x + (par ? dv.x : dv.x), this.panBase.y + dv.y, p.z))
+    })
+    it.onTriggerEnd.add(() => {
+      if (moved > 1.5) {
+        this.panBase = this.root.getTransform().getLocalPosition()
+        return
+      }
+      this.toggleZoom(hitLocal)
+    })
+    // title block
+    const tbW = 9
+    const tbH = 2.6
+    const tb = this.kit.obj(back, "TitleBlock", [w / 2 - 0.4 - tbW / 2, -h / 2 + 0.4 + tbH / 2, 0.09])
+    this.sh(tb, "box", [0, 0, 0], [tbW, tbH, 0.02], [0.99, 0.98, 0.93, 1], "tbfill")
+    this.sh(tb, "box", [0, tbH / 2, 0.02], [tbW, 0.1, 0.02], SHEET_LINE, "tbt")
+    this.sh(tb, "box", [-tbW / 2, 0, 0.02], [0.1, tbH, 0.02], SHEET_LINE, "tbl")
+    this.inkText(tb, "tb1", "3D WIZ  schematic", 18, [0, 0.55, 0.05], BODY_TEXT)
+    this.inkText(tb, "tb2", PROJECT_PACK.identity.short ? (PROJECT_PACK.identity.short as string) : PROJECT_PACK.identity.name, 20, [0, -0.5, 0.05], new vec4(0.55, 0.05, 0.05, 1))
   }
 
   // ------------------------------------------------------------------------------------------------ layout
@@ -228,12 +310,12 @@ export class WizSchematic {
 
   private drawSymbol(s: Sym) {
     const k = this.kit
-    const col: RGBA = KIND_COLOR[s.kind] ? KIND_COLOR[s.kind] : [0.8, 0.8, 0.8, 1]
+    const col: RGBA = ink(KIND_COLOR[s.kind] ? KIND_COLOR[s.kind] : [0.8, 0.8, 0.8, 1])
     s.root = k.obj(this.root, "sym_" + s.id, [s.x, s.y, 0])
-    this.sh(s.root, "box", [0, 0, 0], [s.w, s.h, 0.08], [0.04, 0.07, 0.12, 1], "back")
+    this.sh(s.root, "box", [0, 0, 0], [s.w, s.h, 0.08], SYM_FILL, "back")
     const bm = k.styled(col, false)
     s.border.push(bm)
-    const t = 0.1
+    const t = 0.2
     const edges: [number, number, number, number][] = [
       [0, s.h / 2, s.w + t, t],
       [0, -s.h / 2, s.w + t, t],
@@ -245,18 +327,18 @@ export class WizSchematic {
     }
     const passive = s.kind === "led" || s.kind === "resistor" || s.kind === "diode" || s.kind === "button" || s.kind === "npn"
     const title = passive ? s.id.toUpperCase() : shortName(s.id)
-    makeLabel(s.root, "title", title, passive ? 20 : 22, [0, s.h / 2 - 0.6, 0.14], new vec4(col[0], col[1], col[2], 1))
+    this.inkText(s.root, "title", title, passive ? 23 : 26, [0, s.h / 2 - 0.6, 0.14], new vec4(col[0] * 0.8, col[1] * 0.8, col[2] * 0.8, 1))
     for (const sl of s.slots) {
       const r = ROLE_COLOR[this.roleOf(s.kind, sl.name)]
       const dir = sl.side === "L" ? -1 : 1
       this.sh(s.root, "box", [sl.x + dir * 0.35, sl.y, 0.1], [0.7, 0.07, 0.05], r, "stub_" + sl.name)
       const dot = this.sh(s.root, "sphere", [sl.x + dir * 0.75, sl.y, 0.14], [0.3, 0.3, 0.3], r, "pin_" + sl.name)
-      const mark = this.sh(s.root, "sphere", [sl.x + dir * 0.75, sl.y, 0.2], [0.8, 0.8, 0.8], [1, 1, 1, 1], "mark_" + sl.name)
+      const mark = this.sh(s.root, "sphere", [sl.x + dir * 0.75, sl.y, 0.2], [0.8, 0.8, 0.8], [0.05, 0.05, 0.1, 1], "mark_" + sl.name)
       mark.enabled = false
       this.pinDots[sl.key] = {obj: dot, mark: mark}
       const label = sl.def.label ? sl.def.label : sl.name
       const lx = sl.x - dir * (0.35 + label.length * 0.1)
-      makeLabel(s.root, "pl_" + sl.name, label, 14, [lx, sl.y, 0.14], new vec4(0.92, 0.97, 1, 1))
+      this.inkText(s.root, "pl_" + sl.name, label, 18, [lx, sl.y, 0.14], PIN_TEXT)
     }
     // tap target for the pin picker
     const hit = k.obj(s.root, "shit_" + s.id, [0, 0, 0.35])
@@ -276,7 +358,7 @@ export class WizSchematic {
     s.lampMat = lamp.sm
     if (s.kind === "motor" || s.kind === "servo") {
       const bar = k.obj(s.root, "bar", [-s.w / 2 + 0.9, -s.h / 2 + 0.9, 0.2])
-      this.sh(bar, "box", [0.45, 0, 0], [0.9, 0.12, 0.08], [0.35, 1.0, 1.0, 1], "arm")
+      this.sh(bar, "box", [0.45, 0, 0], [0.9, 0.14, 0.08], [0.55, 0.05, 0.05, 1], "arm")
       bar.enabled = false
       s.bar = bar
     }
@@ -381,8 +463,9 @@ export class WizSchematic {
     // lead-ins from the pin dots
     pts.unshift([ax + dirA * 0.75, ay])
     pts.push([bx + dirB * 0.75, by])
+    color = ink(color)
     const z = 0.12 + (this.wires.length % 7) * 0.012
-    const th = 0.13
+    const th = 0.24
     for (let i = 0; i + 1 < pts.length; i++) {
       const p = pts[i]
       const q = pts[i + 1]
@@ -402,7 +485,7 @@ export class WizSchematic {
     const y = e.sym.y + e.slot.y
     this.sh(root, "box", [x + dir * 0.3, y, 0.12], [0.6, 0.13, 0.06], color, "flagline")
     this.sh(root, "box", [x + dir * 0.62, y, 0.12], [0.13, 0.6, 0.06], color, "flagbar")
-    makeLabel(root, "flagtxt", tag, 14, [x + dir * (0.85 + tag.length * 0.1), y, 0.14], new vec4(color[0] * 0.5 + 0.5, color[1] * 0.5 + 0.5, color[2] * 0.5 + 0.5, 1))
+    this.inkText(root, "flagtxt", tag, 16, [x + dir * (0.85 + tag.length * 0.12), y, 0.14], new vec4(ink(color)[0], ink(color)[1], ink(color)[2], 1))
   }
 
   removeWire(id: string) {
@@ -452,7 +535,7 @@ export class WizSchematic {
   }
 
   private paintSym(s: Sym, f: Fx) {
-    const base: RGBA = KIND_COLOR[s.kind] ? KIND_COLOR[s.kind] : [0.8, 0.8, 0.8, 1]
+    const base: RGBA = ink(KIND_COLOR[s.kind] ? KIND_COLOR[s.kind] : [0.8, 0.8, 0.8, 1])
     const flash = f.alert ? 0.5 + 0.5 * Math.sin(this.clock * 14) : 0
     const c: RGBA = f.alert ? [base[0] * (1 - flash) + flash, base[1] * (1 - flash) + 0.1 * flash, base[2] * (1 - flash) + 0.1 * flash, 1] : [base[0], base[1], base[2], 1]
     for (const b of s.border) b.set(c)
@@ -493,12 +576,59 @@ export class WizSchematic {
     }
   }
 
+  private paperW = 0
+  private paperH = 0
+  private paperMid = 0
+  private zoomed = false
+  private fitScale = 1
+  private fitPos = new vec3(0, 0, 4)
+  private panBase = new vec3(0, 0, 4)
+
+  /** Zoom 2.2x onto the tapped spot of the sheet, or back to the whole sheet. */
+  private toggleZoom(at: vec2) {
+    const t = this.root.getTransform()
+    if (this.zoomed) {
+      this.zoomed = false
+      t.setLocalScale(new vec3(this.fitScale, this.fitScale, this.fitScale))
+      t.setLocalPosition(this.fitPos)
+      return
+    }
+    this.zoomed = true
+    const sc = this.fitScale * 2.2
+    t.setLocalScale(new vec3(sc, sc, sc))
+    // the tapped point of the sheet comes to the middle of the view
+    t.setLocalPosition(new vec3(this.fitPos.x - at.x * sc, this.fitPos.y - at.y * sc, this.fitPos.z))
+    this.panBase = t.getLocalPosition()
+  }
+
+  /** A mouse click on the screen (the preview's stand-in for a pinch): when it lands on the sheet, zoom in there / back out. Returns true if it hit the sheet. */
+  clickScreen(cam: Camera, uv: vec2): boolean {
+    if (!this.root.enabled) return false
+    const ct = cam.getTransform()
+    const sp = this.root.getTransform().getWorldPosition()
+    const view = ct.getWorldRotation().multiplyVec3(new vec3(0, 0, -1))
+    const dist = sp.sub(ct.getWorldPosition()).dot(view)
+    if (dist < 5) return false
+    const w = cam.screenSpaceToWorldSpace(uv, dist)
+    const l = this.root.getTransform().getInvertedWorldTransform().multiplyPoint(w)
+    if (Math.abs(l.x) > this.paperW / 2 || Math.abs(l.y - this.paperMid) > this.paperH / 2) return false
+    this.toggleZoom(new vec2(l.x, l.y))
+    return true
+  }
+
+  isZoomed(): boolean {
+    return this.zoomed
+  }
+
   /** Scale the diagram to fit a box (cm) and centre it at (cx, cy). */
-  fit(maxW: number, maxH: number, cx: number, cy: number) {
+  fit(maxW: number, maxH: number, cx: number, cy: number, z: number = 4) {
     const e = this.extent()
     const sc = Math.min(1, maxW / e.w, maxH / e.h)
+    this.fitScale = sc
+    this.fitPos = new vec3(cx, cy, z)
+    this.zoomed = false
     this.root.getTransform().setLocalScale(new vec3(sc, sc, sc))
-    this.root.getTransform().setLocalPosition(new vec3(cx, cy, 4))
+    this.root.getTransform().setLocalPosition(new vec3(cx, cy, z))
   }
 
   show(on: boolean) {

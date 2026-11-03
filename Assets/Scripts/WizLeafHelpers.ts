@@ -8,8 +8,11 @@ import {findInteractablesByName} from "Leaf.lspkg/Interactors/InteractableUtils"
 import {Button} from "SpectaclesUIKit.lspkg/Scripts/Components/Button/Button"
 import {WizMain} from "./WizMain"
 import {PROJECT_PACK, BUILD_PLAN} from "./ProjectPack"
+import {WizGuide} from "./WizGuide"
 
 export function getMain(): WizMain {
+  // the Circuit Guide sleeps the old lab; a lab scenario wakes it again (run lab scenarios with WizGuide.startMode = lab for a clean start)
+  if (WizGuide.instance !== null && WizGuide.instance.active()) WizGuide.instance.leave()
   const so = findSceneObjectByName("3DWiz")
   if (!so) throw new Error('SceneObject "3DWiz" not found')
   const m = so.getComponent(WizMain.getTypeName()) as WizMain

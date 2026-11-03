@@ -150,8 +150,20 @@ class TouchRouter {
 }
 
 /** Add an interactable to a scene object that already has a collider (all engine hit boxes do). */
+/** When the last interactable (button, part, pill) was pressed: a bare mouse click that is not on any of them is a click on the table. */
+export let lastUiPressAt = -10
+export function uiPressedWithin(sec: number): boolean {
+  return getTime() - lastUiPressAt < sec
+}
+
 export function makeInteractable(so: SceneObject): InteractableLike {
-  if (isSpectacles()) return so.createComponent(SikInteractable.getTypeName()) as SikInteractable
+  if (isSpectacles()) {
+    const sik = so.createComponent(SikInteractable.getTypeName()) as SikInteractable
+    sik.onTriggerStart.add(() => {
+      lastUiPressAt = getTime()
+    })
+    return sik
+  }
   const it = new TouchInteractable()
   TouchRouter.get(so).register(so, it)
   return it

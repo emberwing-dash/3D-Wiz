@@ -65,7 +65,6 @@ export class WizLeafCircuit extends Scenario {
     expect(main.getDebug().validatorCorrect).toBe(1)
     check(main.bench.isConnected(first), first + " drawn connected")
     check(main.getDebug().selectedWire !== first && main.getDebug().selectedWire !== "", "the glow moved to the next wire")
-    check(main.getDebug().xp >= 5, "XP for a wire")
     check(main.getDebug().hudLabel === "1/19", "HUD shows progress only: " + main.getDebug().hudLabel)
     // cross-highlight: the wire's parts glow in the robot too
     const hl = main.robot.highlightedParts()
@@ -79,12 +78,11 @@ export class WizLeafCircuit extends Scenario {
     check(main.bench.highlightedParts().indexOf("oled") >= 0 && main.robot.highlightedParts().indexOf("oled") >= 0, "OLED highlighted on bench AND robot")
     expect(main.hud.infoTexts()[0]).toBe("OLED")
 
-    // finish all 19: COMPLETE + badge
+    // finish all 19: COMPLETE
     for (const id of PROJECT_PACK.validation.expected) {
       if (!main.bench.isConnected(id) || main.getDebug().validatorStatus !== "COMPLETE") await press(it, "whit_" + id, 120)
     }
     await sleep(400)
     expect(main.getDebug().validatorStatus).toBe("COMPLETE")
-    check(main.getDebug().badges.indexOf("wired") >= 0, "wired badge")
   }
 }

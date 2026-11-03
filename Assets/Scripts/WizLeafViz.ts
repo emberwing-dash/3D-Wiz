@@ -100,7 +100,6 @@ export class WizLeafViz extends Scenario {
     check(v.lastScrewResult()!.ok, "M2x5 + PH0 screws in")
     expect(v.holesFilled()).toBe(1)
     await sleep(1500)
-    check(main.getDebug().badges.indexOf("screw") >= 0, "screw badge")
 
     // pure rule check: a too-small interior needs a bigger size; the default fits
     const small = recommend(catalogItems(), {min: [-2.7, 2.2, -3.5], max: [2.7, 3.2, 3.5]})
