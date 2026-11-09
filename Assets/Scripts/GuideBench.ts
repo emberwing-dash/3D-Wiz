@@ -4,8 +4,9 @@
 // Must not: know about the panel, the orb, the narration or the step order. It is told the current step and reports results.
 
 import {PartKit, StyledMat, partPrefab} from "./WizParts"
+import {instModel} from "./GuideParts"
 import {GuidePack, GuidePart, GuideSpot, GuideStep, V3} from "./GuideData"
-import {GLOW_GUIDE, GLOW_OK, GLOW_WRONG, makeGrab, ontoPlane, v3} from "./GuideKit"
+import {GLOW_GUIDE, GLOW_OK, GLOW_WRONG, makeGrab, ontoPlane, outlineBox, v3} from "./GuideKit"
 import {GuideModel} from "./GuideModel"
 import {RGBA} from "./ProjectPack"
 
@@ -78,6 +79,7 @@ export class GuideBench {
   private boardPins: PinRt[] = []
   private parts: PartRt[] = []
   private spotGlow: {[spot: string]: {root: SceneObject; mats: StyledMat[]}} = {}
+  private spotHome: {[spot: string]: V3} = {}
   private wires: WireRt[] = []
   private wire: WireRt | null = null
   private step: GuideStep | null = null
@@ -92,7 +94,9 @@ export class GuideBench {
 
   constructor(parent: SceneObject, kit: PartKit, pack: GuidePack, scale: number, tiltDeg: number) {
     this.kit = kit
-    this.pack = pack
+    // own copy of the spots: they are moved to fit an imported model, the shared sample packs must stay as authored
+    this.pack = {...pack, spots: pack.spots.map((s) => ({...s, at: [...s.at] as V3, plate: [s.plate[0], s.plate[1]] as [number, number]}))}
+    for (const s of this.pack.spots) this.spotHome[s.id] = [...s.at] as V3
     this.scale = scale
     this.work = kit.obj(parent, "GuideWork", [0, -5, -50])
     this.work.getTransform().setLocalScale(new vec3(scale, scale, scale))
@@ -133,12 +137,36 @@ export class GuideBench {
   buildModel(source: "rc" | "fbx", fbx: ObjectPrefab | null) {
     this.model.build(source, fbx)
     this.model.root.getTransform().setLocalPosition(new vec3(-6.2, 3.9, 0))
+    this.fitSpotsToModel(source === "fbx")
     for (const s of this.pack.spots) if (s.on === "model") this.spotGlow[s.id].root.setParent(this.model.root)
     for (const p of this.parts) {
       if (p.placed && p.spot !== "" && this.spotOf(p.spot).on === "model") {
         p.root.setParent(this.model.root)
         p.root.getTransform().setLocalPosition(v3(this.spotOf(p.spot).at))
       }
+    }
+  }
+
+  /** A model of your own: the spots on the model move onto its top surface (spread along its long side); the RC car keeps the authored spots. */
+  private fitSpotsToModel(custom: boolean) {
+    const ms = this.pack.spots.filter((s) => s.on === "model")
+    const b = this.model.bounds()
+    const sx = b.max.x - b.min.x
+    const sz = b.max.z - b.min.z
+    const alongX = sx >= sz
+    const span = alongX ? sx : sz
+    const step = Math.min(span / Math.max(ms.length, 1), 3.4)
+    for (let i = 0; i < ms.length; i++) {
+      const s = ms[i]
+      if (!custom) {
+        s.at = [...this.spotHome[s.id]] as V3
+      } else {
+        const off = (i - (ms.length - 1) / 2) * step
+        const cx = (b.min.x + b.max.x) / 2
+        const cz = (b.min.z + b.max.z) / 2
+        s.at = alongX ? [cx + off, b.max.y, cz] : [cx, b.max.y, cz + off]
+      }
+      if (this.spotGlow[s.id]) this.spotGlow[s.id].root.getTransform().setLocalPosition(v3(s.at))
     }
   }
 
@@ -157,18 +185,22 @@ export class GuideBench {
 
   private makePart(def: GuidePart): PartRt {
     const root = this.kit.obj(this.work, "guide_" + def.id, def.trayAt)
-    const pf = partPrefab(def.glb)
-    if (pf !== null) pf.instantiate(root)
+    instModel(this.kit, root, def.glb, def.sizeCm)
     const pins = def.pins.map((p) => this.makePin(root, def.id + "." + p.id, p.label, p.at))
     for (const p of pins) p.dot.mat.mainPass.baseColor = new vec4(1, 1, 1, 0.0) // pin dots only show once the part is placed
     const hit = this.kit.obj(root, "guide_part_" + def.id, [0, def.sizeCm[1] / 2, 0])
     const rt: PartRt = {def: def, root: root, hit: hit, pins: pins, placed: false, spot: "", grab: false, prev: vec3.zero(), prevParent: this.work, moved: 0, goal: null}
     const hs = new vec3(Math.max(def.sizeCm[0] + 0.8, 2.2), Math.max(def.sizeCm[1] + 0.6, 1.4), Math.max(def.sizeCm[2] + 0.8, 2.2))
-    makeGrab(hit, hs, {
+    const it = makeGrab(hit, hs, {
       start: () => this.beginPart(rt),
       move: (d) => this.movePart(rt, d),
       end: () => this.endPart(rt),
     })
+    // a faint cyan block shows which part the pointer is on (big, easy grab target)
+    const halo = outlineBox(this.kit, hit, "hover_halo", hs)
+    halo.enabled = false
+    it.onHoverEnter.add(() => (halo.enabled = true))
+    it.onHoverExit.add(() => (halo.enabled = false))
     return rt
   }
 
@@ -357,6 +389,7 @@ export class GuideBench {
 
   /** Back to the start of a build: every part in the tray, no wires, no glow. */
   reset() {
+    this.setLedLit(false)
     for (const w of this.wires) {
       if (!isNull(w.line)) w.line.destroy()
       for (const e of w.ends) if (!isNull(e.obj)) e.obj.destroy()
@@ -669,6 +702,25 @@ export class GuideBench {
     }
   }
 
+  private ledGlow: SceneObject | null = null
+  private ledOn = false
+
+  /** Play on a circuit without a vehicle: the placed LED lights up (a warm glow that breathes). Off again on restart. */
+  setLedLit(on: boolean) {
+    this.ledOn = on
+    for (const p of this.parts) {
+      if (p.def.id !== "led") continue
+      if (this.ledGlow === null || isNull(this.ledGlow)) {
+        this.ledGlow = this.kit.shape(p.root, "sphere", [0, p.def.sizeCm[1] * 0.75, 0], [1.5, 1.5, 1.5], [1.0, 0.85, 0.35, 1], "led_glow", false).obj
+      }
+      this.ledGlow.enabled = on
+    }
+  }
+
+  isLedLit(): boolean {
+    return this.ledOn
+  }
+
   isWrongShown(): boolean {
     return this.glowState === "wrong"
   }
@@ -676,6 +728,10 @@ export class GuideBench {
   update(dt: number) {
     this.clock += dt
     this.model.update(dt)
+    if (this.ledOn && this.ledGlow !== null && !isNull(this.ledGlow)) {
+      const k = 1 + 0.18 * Math.sin(this.clock * 6)
+      this.ledGlow.getTransform().setLocalScale(new vec3(k, k, k))
+    }
     // pulse
     const pulse = 1 + 0.12 * Math.sin(this.clock * 5)
     for (const id in this.spotGlow) {

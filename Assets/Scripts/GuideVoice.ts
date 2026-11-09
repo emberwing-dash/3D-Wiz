@@ -20,8 +20,19 @@ export const CATALOGUE: Tutorial[] = [
   {id: "rc-car", title: "RC Car", blurb: "Motor driver + steering servo", tags: ["rc", "car", "drive", "motor", "build", "remote", "toy"], ready: true},
   {id: "servo-hand", title: "Servo Hand", blurb: "One servo per finger (no step list yet)", tags: ["hand", "servo", "finger", "arm", "robot"], ready: false},
   {id: "desk-pet", title: "Desk Pet", blurb: "OLED face pet (no step list yet)", tags: ["pet", "desk", "oled", "face", "cat", "buddy"], ready: false},
-  {id: "led-blink", title: "LED Starter", blurb: "First circuit: LED + resistor (no step list yet)", tags: ["led", "light", "blink", "starter", "basic"], ready: false},
+  {id: "led-blink", title: "LED Starter", blurb: "First circuit: battery, switch, resistor, LED", tags: ["led", "light", "lamp", "blink", "starter", "simple", "basic", "first"], ready: true},
 ]
+
+/** Add a step list the user brought (KiCad file, circuit photo, tutorial video): it shows up in the search results like a bundled one. */
+export function registerTutorial(t: Tutorial): void {
+  for (let i = 0; i < CATALOGUE.length; i++) {
+    if (CATALOGUE[i].id === t.id) {
+      CATALOGUE[i] = t
+      return
+    }
+  }
+  CATALOGUE.push(t)
+}
 
 export interface Intent {
   intent: "build"
@@ -33,6 +44,27 @@ export interface Intent {
 export function pickKey(inspector: string, local: string): string {
   const a = inspector.trim()
   return a.length > 0 ? a : local.trim()
+}
+
+/** Two providers: a key that starts with gsk_ is a Groq key (OpenAI-compatible endpoint, very fast); anything else (AQ., AIza) is Gemini. */
+export type Provider = "groq" | "gemini"
+export function providerOf(key: string): Provider {
+  return key.trim().indexOf("gsk_") === 0 ? "groq" : "gemini"
+}
+
+/** Key order: the Inspector field first, else a local .env module (Groq first because it is the faster one, then Gemini), else none. */
+export function pickKeyMulti(inspector: string, groqLocal: string, geminiLocal: string): string {
+  const a = inspector.trim()
+  if (a.length > 0) return a
+  const g = groqLocal.trim()
+  return g.length > 0 ? g : geminiLocal.trim()
+}
+
+/** The text of an OpenAI-style (Groq) chat completion answer. */
+export function groqText(body: any): string {
+  const c = body && body.choices && body.choices[0] && body.choices[0].message ? body.choices[0].message.content : ""
+  if (typeof c !== "string" || c.trim().length === 0) throw new Error("empty groq answer")
+  return c
 }
 
 export const SCRIPTED_LINE = "I want build car"
@@ -95,12 +127,15 @@ export function geminiText(resp: any): string {
   }
 }
 
+/** The longest AI-written step list that is accepted (the bundled RC list has 19 steps, so a full build must fit). */
+export const MAX_AI_STEPS = 24
+
 /** Gemini's step list -> a validated GuidePack (RC_SAMPLE's parts / pins / spots / board with new steps). null if anything does not resolve. */
 export function stepsProblem(text: string): string {
   try {
     const o = JSON.parse(text.trim().replace(/^```json\s*/i, "").replace(/```$/, ""))
     const steps = Array.isArray(o) ? o : o.steps
-    if (!Array.isArray(steps) || steps.length < 2 || steps.length > 14) return "step count outside 2..14"
+    if (!Array.isArray(steps) || steps.length < 2 || steps.length > MAX_AI_STEPS) return "step count outside 2.." + MAX_AI_STEPS
     parseGuidePack(JSON.stringify({...RC_SAMPLE, steps: steps}))
     return ""
   } catch (e) {
@@ -112,7 +147,7 @@ export function parseStepsJson(text: string): GuidePack | null {
   try {
     const o = JSON.parse(text.trim().replace(/^```json\s*/i, "").replace(/```$/, ""))
     const steps = Array.isArray(o) ? o : o.steps
-    if (!Array.isArray(steps) || steps.length < 2 || steps.length > 14) return null
+    if (!Array.isArray(steps) || steps.length < 2 || steps.length > MAX_AI_STEPS) return null
     const pack: GuidePack = {...RC_SAMPLE, steps: steps, source: "Step list written by Gemini (validated), not analysed from a video"}
     return parseGuidePack(JSON.stringify(pack))
   } catch (e) {
@@ -121,6 +156,7 @@ export function parseStepsJson(text: string): GuidePack | null {
 }
 
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/"
+const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions"
 
 export class GeminiClient {
   /** Last call, for the log (never the key): http status, milliseconds, a short note. */
@@ -129,7 +165,26 @@ export class GeminiClient {
   lastNote = ""
   stepsNote = ""
   /** `getKey` reads the Inspector field at call time; the key is only ever put in a request header and never logged or stored. */
-  constructor(private getKey: () => string, private model: () => string, private delay: (sec: number, f: () => void) => void, private enabled: () => boolean = () => true) {}
+  constructor(private getKey: () => string, private model: () => string, private delay: (sec: number, f: () => void) => void, private enabled: () => boolean = () => true, private groqModel: () => string = () => "llama-3.3-70b-versatile", private getGroqKey: () => string = () => "") {}
+
+  /** Which provider serves a request: the visible intent prefers Groq (fast), step lists and ASK MORE prefer Gemini; each falls back to the other provider's key,
+   *  and with no key at all the caller uses its local fallback. Providers are decided by key prefix (gsk_ = Groq), never by the field they came from. */
+  private pick(kind: "intent" | "steps" | "ask"): {prov: Provider; key: string} | null {
+    const gm = this.getKey().trim()
+    const gq = this.getGroqKey().trim()
+    const all: {prov: Provider; key: string}[] = []
+    for (const k of [gq, gm]) if (k.length > 10) all.push({prov: providerOf(k), key: k})
+    const groqs = all.filter((x) => x.prov === "groq")
+    const gems = all.filter((x) => x.prov === "gemini")
+    const order = kind === "intent" ? groqs.concat(gems) : gems.concat(groqs)
+    return order.length > 0 ? order[0] : null
+  }
+
+  /** Which provider a kind of request would use right now (for logs / tests): "groq", "gemini" or "none". */
+  providerFor(kind: "intent" | "steps" | "ask"): string {
+    const p = this.pick(kind)
+    return p === null ? "none" : p.prov
+  }
 
   /** Quota guards: answers are cached in memory by request text (never by key), identical in-flight calls are shared, a session makes at most
    *  `maxCalls` network calls and nothing is retried. Not persisted: a persisted copy would only be prompts and answers, but it is not needed yet. */
@@ -140,7 +195,7 @@ export class GeminiClient {
 
   /** Live AI is on only when the Inspector switch `liveAi` is on AND a key is set. Off = no network call is ever made. */
   available(): boolean {
-    return this.enabled() && this.getKey().trim().length > 10
+    return this.enabled() && (this.getKey().trim().length > 10 || this.getGroqKey().trim().length > 10)
   }
 
   hasCached(prompt: string): boolean {
@@ -170,7 +225,7 @@ export class GeminiClient {
     this.intent(transcript).catch(() => undefined)
   }
 
-  private post(prompt: string, json: boolean = true, timeoutS: number = 12): Promise<string> {
+  private post(prompt: string, json: boolean = true, timeoutS: number = 12, kind: "intent" | "steps" | "ask" = "ask"): Promise<string> {
     const ck = prompt + (json ? "|json" : "|text")
     if (this.cache[ck] !== undefined) return Promise.resolve(this.cache[ck])
     if (!this.available()) return Promise.reject(new Error("live AI is off"))
@@ -178,7 +233,7 @@ export class GeminiClient {
     if (base === undefined) {
       if (this.calls >= this.maxCalls) return Promise.reject(new Error("call cap reached"))
       this.calls++
-      base = this.rawFetch(prompt, json)
+      base = this.rawFetch(prompt, json, kind)
       this.inflight[ck] = base
       // the call is kept until it really finishes: a caller that gave up (timeout) neither loses the answer (it still fills the cache)
       // nor causes a second identical call while this one is running
@@ -196,13 +251,27 @@ export class GeminiClient {
     return Promise.race([base, wait])
   }
 
-  private async rawFetch(prompt: string, json: boolean): Promise<string> {
+  private async rawFetch(prompt: string, json: boolean, kind: "intent" | "steps" | "ask"): Promise<string> {
     const net: any = require("LensStudio:InternetModule")
-    const req = new Request(ENDPOINT + this.model().trim() + ":generateContent", {
-      method: "POST",
-      headers: {"Content-Type": "application/json", "x-goog-api-key": this.getKey().trim()},
-      body: JSON.stringify({contents: [{parts: [{text: prompt}]}], generationConfig: json ? {responseMimeType: "application/json", temperature: 0.1} : {temperature: 0.3, maxOutputTokens: 900}}),
-    } as any)
+    const pk = this.pick(kind)
+    if (pk === null) throw new Error("no key")
+    const groq = pk.prov === "groq"
+    const key = pk.key
+    const req = groq
+      ? new Request(GROQ_ENDPOINT, {
+          method: "POST",
+          headers: {"Content-Type": "application/json", Authorization: "Bearer " + key},
+          body: JSON.stringify(
+            json
+              ? {model: this.groqModel().trim(), messages: [{role: "user", content: prompt}], temperature: 0.1, response_format: {type: "json_object"}}
+              : {model: this.groqModel().trim(), messages: [{role: "user", content: prompt}], temperature: 0.3, max_tokens: 400},
+          ),
+        } as any)
+      : new Request(ENDPOINT + this.model().trim() + ":generateContent", {
+          method: "POST",
+          headers: {"Content-Type": "application/json", "x-goog-api-key": key},
+          body: JSON.stringify({contents: [{parts: [{text: prompt}]}], generationConfig: json ? {responseMimeType: "application/json", temperature: 0.1} : {temperature: 0.3, maxOutputTokens: 900}}),
+        } as any)
     const t0 = getTime()
     const call = (async () => {
       const res: any = await net.fetch(req)
@@ -220,10 +289,41 @@ export class GeminiClient {
         throw new Error(this.lastNote)
       }
       this.lastNote = "ok"
-      return geminiText(JSON.parse(body))
+      return groq ? groqText(JSON.parse(body)) : geminiText(JSON.parse(body))
     })()
     // a hard stop so a hung request cannot block identical requests for the rest of the session
     const hard = new Promise<string>((_, rej) => this.delay(60, () => rej(new Error("hard timeout"))))
+    return Promise.race([call, hard])
+  }
+
+  /** Read a circuit photo / drawing (Gemini vision). Returns the model's JSON text; the caller validates it (circuitFromJson). Needs a Gemini key and liveAi on. */
+  async vision(prompt: string, base64: string, mime: string, timeoutS: number = 45): Promise<string> {
+    const key = this.getKey().trim()
+    if (!this.enabled() || key.length <= 10 || providerOf(key) !== "gemini") throw new Error("reading a photo needs a Gemini key and live AI on")
+    if (this.calls >= this.maxCalls) throw new Error("call cap reached")
+    this.calls++
+    const net: any = require("LensStudio:InternetModule")
+    const req = new Request(ENDPOINT + this.model().trim() + ":generateContent", {
+      method: "POST",
+      headers: {"Content-Type": "application/json", "x-goog-api-key": key},
+      body: JSON.stringify({contents: [{parts: [{text: prompt}, {inline_data: {mime_type: mime, data: base64}}]}], generationConfig: {responseMimeType: "application/json", temperature: 0.1}}),
+    } as any)
+    const t0 = getTime()
+    const call = (async () => {
+      const res: any = await net.fetch(req)
+      this.lastStatus = res.status
+      const body = await res.text()
+      this.lastMs = Math.round((getTime() - t0) * 1000)
+      if (res.status !== 200) {
+        this.lastNote = "http " + res.status
+        throw new Error(this.lastNote)
+      }
+      this.lastNote = "ok"
+      const t = geminiText(JSON.parse(body))
+      if (t === "") throw new Error("empty answer")
+      return t
+    })()
+    const hard = new Promise<string>((_, rej) => this.delay(timeoutS, () => rej(new Error("timeout"))))
     return Promise.race([call, hard])
   }
 
@@ -236,12 +336,12 @@ export class GeminiClient {
   }
 
   async intent(transcript: string): Promise<Intent | null> {
-    return parseIntentJson(await this.post(this.intentPrompt(transcript)))
+    return parseIntentJson(await this.post(this.intentPrompt(transcript), true, 12, "intent"))
   }
 
   /** Short free-text answer for the ANALYSE page ("Ask more"). Only called when a key is set; the caller falls back to the local card. */
   async ask(part: string, what: string, timeoutS: number = 12): Promise<string> {
-    const t = await this.post("In 3 short plain sentences, tell a maker more about this part of a DIY RC car: " + part + " (" + what + "). No markdown.", false, timeoutS)
+    const t = await this.post("In 3 short plain sentences, tell a maker more about this part of a DIY RC car: " + part + " (" + what + "). No markdown.", false, timeoutS, "ask")
     return t.trim()
   }
 
@@ -257,7 +357,7 @@ export class GeminiClient {
 
   async steps(project: string): Promise<GuidePack | null> {
     if (project !== "rc-car") return null
-    const text = await this.post(this.stepsPrompt(project), true, 30)
+    const text = await this.post(this.stepsPrompt(project), true, 30, "steps")
     const why = stepsProblem(text)
     this.stepsNote = why === "" ? "accepted by parseGuidePack" : "rejected: " + why
     return parseStepsJson(text)

@@ -34,6 +34,13 @@ import {WizLeafG12} from "./WizLeafG12"
 import {WizLeafLiveE2E} from "./WizLeafLiveE2E"
 import {WizLeafLiveInflight} from "./WizLeafLiveInflight"
 import {WizLeafKeySrc} from "./WizLeafKeySrc"
+import {WizLeafG13} from "./WizLeafG13"
+import {WizLeafG14} from "./WizLeafG14"
+import {WizLeafG15} from "./WizLeafG15"
+import {WizLeafG16} from "./WizLeafG16"
+import {WizLeafG17} from "./WizLeafG17"
+import {WizLeafG18} from "./WizLeafG18"
+import {WizLeafPhotoLive} from "./WizLeafPhotoLive"
 
 @component
 export class WizLeafIndex extends BaseScriptComponent {
@@ -69,6 +76,13 @@ export class WizLeafIndex extends BaseScriptComponent {
     {id: "g10-analyse-info", typename: WizLeafG10.getTypeName()},
     {id: "g11-build-entry-hands", typename: WizLeafG11.getTypeName()},
     {id: "g12-instant-actions", typename: WizLeafG12.getTypeName()},
+    {id: "g13-menu-pages-in-view", typename: WizLeafG13.getTypeName()},
+    {id: "g14-auto-build-showcase", typename: WizLeafG14.getTypeName()},
+    {id: "g15-your-turn-interaction", typename: WizLeafG15.getTypeName()},
+    {id: "g16-model-picker", typename: WizLeafG16.getTypeName()},
+    {id: "g17-showcase-controls", typename: WizLeafG17.getTypeName()},
+    {id: "g18-led-and-imports", typename: WizLeafG18.getTypeName()},
+    {id: "x-photo-live", typename: WizLeafPhotoLive.getTypeName()},
     {id: "x-live-e2e", typename: WizLeafLiveE2E.getTypeName()},
     {id: "x-gemini-live", typename: WizLeafLive.getTypeName()},
     {id: "x-live-inflight", typename: WizLeafLiveInflight.getTypeName()},

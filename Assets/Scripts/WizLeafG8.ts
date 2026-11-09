@@ -9,7 +9,7 @@ import {DefaultLeafInteractor} from "Leaf.lspkg/Interactors/interactor/DefaultLe
 import {check, getMain, press} from "./WizLeafHelpers"
 import {WizGuide} from "./WizGuide"
 import {RC_SAMPLE} from "./GuideData"
-import {pickKey, parseIntentJson, keywordIntent, geminiText, parseStepsJson, filterCatalogue, SCRIPTED_LINE} from "./GuideVoice"
+import {pickKeyMulti, providerOf, groqText, pickKey, parseIntentJson, keywordIntent, geminiText, parseStepsJson, filterCatalogue, SCRIPTED_LINE} from "./GuideVoice"
 
 async function until(c: () => boolean, maxS: number, what: string): Promise<void> {
   const t0 = getTime()
@@ -47,9 +47,12 @@ export class WizLeafG8 extends Scenario {
     check(pickKey("insp-fake-0000", "env-fake-0000") === "insp-fake-0000", "key order: the Inspector field wins")
     check(pickKey("  ", "env-fake-0000") === "env-fake-0000" && pickKey("", "env-fake-0000") === "env-fake-0000", "key order: else the .env module")
     check(pickKey("", "") === "", "key order: else none (offline)")
+    check(providerOf("gsk_fake0000") === "groq" && providerOf("AQ.fake") === "gemini" && providerOf("AIzaFake") === "gemini", "provider by key prefix")
+    check(pickKeyMulti("", "gsk_g", "AQ.g") === "gsk_g" && pickKeyMulti("", "", "AQ.g") === "AQ.g" && pickKeyMulti("ins", "gsk_g", "AQ.g") === "ins", "multi key order: Inspector, Groq .env, Gemini .env")
+    check(groqText({choices: [{message: {content: '{"a":1}'}}]}) === '{"a":1}', "groq answer text read")
     const steps = JSON.stringify({steps: RC_SAMPLE.steps})
     const p = parseStepsJson(steps)
-    check(p !== null && p.steps.length === 8 && p.source.indexOf("Gemini") >= 0, "a valid fake step list is accepted")
+    check(p !== null && p.steps.length === RC_SAMPLE.steps.length && p.source.indexOf("Gemini") >= 0, "a valid fake step list is accepted (" + RC_SAMPLE.steps.length + " steps)")
     const bad1 = JSON.stringify({steps: RC_SAMPLE.steps.map((s, i) => (i === 2 ? {...s, pins: ["esp32.IO99", "l293d.2"]} : s))})
     const bad2 = JSON.stringify({steps: RC_SAMPLE.steps.map((s, i) => (i === 0 ? {...s, part: "warpcore"} : s))})
     check(parseStepsJson(bad1) === null, "a step with an unknown pin is rejected")

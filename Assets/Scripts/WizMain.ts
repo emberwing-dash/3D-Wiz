@@ -311,6 +311,12 @@ export class WizMain extends BaseScriptComponent {
   private bind() {
     this.buildHeadUI()
     // the Circuit Guide's MENU button comes back to this title screen
+    WizGuide.onError = (msg) => {
+      this.toLaunch()
+      this.menu.openAfter(0.8)
+      this.hud.toast("page failed", new vec4(1.0, 0.45, 0.4, 1))
+      this.phoboSay("That page did not open: " + msg, "worried")
+    }
     WizGuide.isTitle = () => this.mode === "launch"
     WizGuide.onLegacy = (id) => {
       this.menu.closeMenu("select")
@@ -617,6 +623,7 @@ export class WizMain extends BaseScriptComponent {
       out.push({id: "viz3d", icon: "view_in_ar", label: "Visualize"})
       out.push({id: "analyse", icon: "visibility", label: "Analyse"})
       out.push({id: "build", icon: "build", label: "Build"})
+      out.push({id: "mymodel", icon: "upload_file", label: "My Model"})
       return out
     }
     const myModel = PROJECT_PACK.identity.id === MY_MODEL_ID
@@ -695,10 +702,16 @@ export class WizMain extends BaseScriptComponent {
       this.enterMode("lab")
       return
     }
-    if (id === "guide" || id === "build" || id === "viz3d" || id === "analyse") {
+    if (id === "guide" || id === "build" || id === "viz3d" || id === "analyse" || id === "mymodel") {
       this.menu.closeMenu("select")
       const g = WizGuide.instance
-      if (g !== null) g.enterFromMenu(id === "viz3d" ? "viz" : id === "analyse" ? "analyse" : "build")
+      if (g !== null) g.enterFromMenu(id === "viz3d" ? "viz" : id === "analyse" ? "analyse" : id === "mymodel" ? "mymodel" : "build")
+      else {
+        // never fail silently
+        print("[WizMain] the page scripts are not running (WizGuide missing): recompile / check the CircuitGuide object")
+        this.hud.toast("page not loaded", new vec4(1.0, 0.45, 0.4, 1))
+        this.phoboSay("That page did not load. Recompile and try again.", "worried")
+      }
       return
     }
     if (id === "drive") {

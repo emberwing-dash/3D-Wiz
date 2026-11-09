@@ -71,7 +71,7 @@ export class WizLeafMenu extends Scenario {
     expect(main.menu.lastGesture()).toBe("open:hand")
     const ids = main.menu.itemIds()
     for (const need of ["viz3d", "analyse", "build"]) check(ids.indexOf(need) >= 0, "the title menu has the " + need + " icon: " + ids.join(","))
-    check(ids.filter((i) => i !== "continue").length === 3, "the title menu is exactly Visualize + Analyse + Build: " + ids.join(","))
+    check(ids.filter((i) => i !== "continue").length === 4, "the title menu is Visualize + Analyse + Build + My Model: " + ids.join(","))
     main.menu.playHandDemo(false)
     await sleep(1500)
     expect(main.menu.isOpen()).toBe(false)

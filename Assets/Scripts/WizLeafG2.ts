@@ -19,7 +19,7 @@ export class WizLeafG2 extends Scenario {
   private async body(): Promise<void> {
     await sleep(1500)
     const g = await freshGuide()
-    check(g.stepCount() === 8, "saved step list has 8 steps: " + g.stepCount())
+    check(g.stepCount() === 19, "saved step list has 19 steps: " + g.stepCount())
     for (let i = 0; i < g.stepCount(); i++) {
       check(g.stepIndex() === i && g.phase() === "working", "step " + (i + 1) + " is current: idx=" + g.stepIndex() + " phase=" + g.phase())
       const st = g.stepAt(i)
@@ -43,6 +43,6 @@ export class WizLeafG2 extends Scenario {
     }
     check(g.phase() === "built", "after the last step the build is done: " + g.phase())
     check(g.bench.glowPins().length === 0 && g.bench.glowSpots().length === 0, "no glow left after the last step")
-    check(g.bench.placedCount() === 3, "3 parts placed")
+    check(g.bench.placedCount() === 8, "8 parts placed: " + g.bench.placedCount())
   }
 }

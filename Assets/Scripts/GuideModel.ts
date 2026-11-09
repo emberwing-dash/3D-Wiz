@@ -6,7 +6,7 @@
 
 import {PartKit} from "./WizParts"
 import {fitUserModel} from "./WizUserModel"
-import {makeGrab, v3} from "./GuideKit"
+import {makeGrab, outlineBox, v3} from "./GuideKit"
 import {V3} from "./GuideData"
 
 export type ModelSource = "rc" | "fbx"
@@ -74,10 +74,11 @@ export class GuideModel {
   private spin = 0
   private heading = 0
   private xray = false
+  private haloObj: SceneObject | null = null
   private kit: PartKit
   /** world limits of free placement (cm) */
-  static LIM_MIN = new vec3(-42, -34, -95)
-  static LIM_MAX = new vec3(42, 30, -22)
+  static LIM_MIN = new vec3(-1000, -1000, -1000) // the pages are anchored to the camera, so there is no fixed world box any more
+  static LIM_MAX = new vec3(1000, 1000, 1000)
   onMoved: (() => void) | null = null
   onPartDropped: ((p: ModelPart, snapped: boolean) => void) | null = null
 
@@ -200,8 +201,19 @@ export class GuideModel {
     const c = this.boundsMax.add(this.boundsMin).uniformScale(0.5)
     this.bodyHit.getTransform().setLocalPosition(c)
     if (this.bodyHit.getComponent("Physics.ColliderComponent")) this.bodyHit.getComponent("Physics.ColliderComponent").destroy()
-    makeGrab(this.bodyHit, sz.add(new vec3(1, 1, 1)), {
+    const bsz = sz.add(new vec3(1, 1, 1))
+    const it = makeGrab(this.bodyHit, bsz, {
       move: (d) => this.moveBy(d),
+    })
+    for (let i = this.bodyHit.getChildrenCount() - 1; i >= 0; i--) this.bodyHit.getChild(i).destroy()
+    const halo = outlineBox(this.kit, this.bodyHit, "hover_halo", bsz, [0.35, 0.95, 1, 1], 0.18)
+    this.haloObj = halo
+    halo.enabled = false
+    it.onHoverEnter.add(() => {
+      if (!isNull(halo)) halo.enabled = true
+    })
+    it.onHoverExit.add(() => {
+      if (!isNull(halo)) halo.enabled = false
     })
     this.bodyHit.enabled = true
   }
@@ -220,6 +232,16 @@ export class GuideModel {
       for (let i = 0; i < o.getChildrenCount(); i++) walk(o.getChild(i))
     }
     for (const p of this.parts) walk(p.obj)
+  }
+
+  /** Test / demo hook: show the hover outline without a pointer. */
+  showHoverOutline(on: boolean): void {
+    if (this.haloObj !== null && !isNull(this.haloObj)) this.haloObj.enabled = on
+  }
+
+  /** Local bounds of the model (cm), after build(). */
+  bounds(): {min: vec3; max: vec3} {
+    return {min: this.boundsMin, max: this.boundsMax}
   }
 
   isXray(): boolean {

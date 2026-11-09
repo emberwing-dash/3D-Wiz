@@ -44,8 +44,8 @@ export class WizLeafG10 extends Scenario {
     await press(it, "an_hit_demo", 800)
     check(a.demoRunning, "the demo started")
     const t0 = getTime()
-    while (a.demoRunning && getTime() - t0 < 120) await sleep(300)
-    check(!a.demoRunning && a.opened.length >= 4 && !a.cardShown(), "the hand opened " + a.opened.join(",") + " and the card is closed again")
+    while (a.demoRunning && getTime() - t0 < 160) await sleep(300)
+    check(!a.demoRunning && a.opened.length >= 8 && !a.cardShown(), "the hand opened " + a.opened.join(",") + " and the card is closed again")
     g.leave()
   }
 }

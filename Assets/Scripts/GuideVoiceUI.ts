@@ -9,6 +9,7 @@ import {rrect} from "./WizUI"
 import {label, makeTap, TEXT_DIM, TEXT_LIGHT} from "./GuideKit"
 import {DemoHand} from "./GuideDemo"
 import {mainCamera} from "./WizPlacement"
+import {packForProject} from "./GuideData"
 import {CATALOGUE, Intent, SCRIPTED_LINE, Tutorial, GeminiClient, filterCatalogue, keywordIntent} from "./GuideVoice"
 import type {WizGuide} from "./WizGuide"
 
@@ -355,7 +356,7 @@ export class GuideVoice {
     if (this.stage !== "confirm" || this.selected === null) return
     const t = this.selected
     if (!t.ready) {
-      this.note = "Only the RC Car has a step list in this build."
+      this.note = "No step list for this one yet."
       this.noteLabel.text = this.note
       this.cancel()
       return
@@ -367,7 +368,7 @@ export class GuideVoice {
     // never wait for the network: the bundled sample step list starts at once; an AI step list is used only if it is already cached
     const pack = this.gemini.available() ? this.gemini.cachedSteps(t.id) : null
     this.stepsSource = pack ? "gemini" : "sample"
-    if (pack) this.g.usePack(pack)
+    this.g.usePack(pack ? pack : packForProject(t.id))
     this.endUi()
     this.g.enter()
     if (this.autoHands) this.g.startDemo()
@@ -470,8 +471,11 @@ export class GuideVoice {
     const cam = mainCamera()
     if (!cam) return
     const p = cam.screenSpaceToWorldSpace(new vec2(0.5, 0.9), 40)
-    this.micRoot.getTransform().setWorldPosition(new vec3(p.x - 3.9, p.y, p.z))
-    if (this.stage === "idle" || this.stage === "listening" || this.stage === "thinking") this.autoRoot.getTransform().setWorldPosition(new vec3(p.x + 3.4, p.y, p.z))
+    this.micRoot.getTransform().setWorldPosition(new vec3(p.x, p.y, p.z))
+    // the title keeps only the three page buttons and the voice button: the HANDS switch shows once the flow is open
+    const showAuto = this.stage !== "idle"
+    if (this.autoRoot.enabled !== showAuto) this.autoRoot.enabled = showAuto
+    if (this.stage === "idle" || this.stage === "listening" || this.stage === "thinking") this.autoRoot.getTransform().setWorldPosition(new vec3(p.x + 7.6, p.y, p.z))
   }
 
   aiBadgeText(): string {

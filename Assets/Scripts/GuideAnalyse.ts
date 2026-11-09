@@ -14,6 +14,7 @@ import {Seq} from "./GuideVoiceUI"
 import {RC_MOUNTS, buildPart, vizPart} from "./GuideParts"
 import {infoOf} from "./GuideInfo"
 import {anchorWorld} from "./GuideUI"
+import {DemoCtl} from "./GuideDemoCtl"
 
 // tag layout: which side the name plate sits on and where along the table depth (table-local z)
 const TAGS: {part: string; side: -1 | 1; z: number}[] = [
@@ -26,6 +27,9 @@ const TAGS: {part: string; side: -1 | 1; z: number}[] = [
   {part: "motor", side: 1, z: 0.6},
   {part: "battery", side: 1, z: 3.2},
 ]
+
+/** The order the simulated hand opens the info cards in: every tag on the page. */
+const DEMO_PARTS = ["esp32", "l293d", "battery", "servo", "motor", "led", "resistor", "switch"]
 
 interface TagRt {
   part: string
@@ -63,6 +67,13 @@ export class GuideAnalyse {
   private oi = 0
   private scale = 0.9
   private bar!: SceneObject
+  private instr!: Text
+  private hint!: Text
+  private demoLabel!: Text
+  private pauseLabel!: Text
+  private speedLabel!: Text
+  private tapLabel!: Text
+  private ctl = new DemoCtl()
   private clock = 0
   private frame = 0
   private leadersDirty = true
@@ -131,19 +142,60 @@ export class GuideAnalyse {
     return {part: part, dot: dot, leader: leader, plate: plate, iBtn: ib, iLabel: il, at: at}
   }
 
-  private pill(id: string, text: string, x: number, z: number, w: number, color: [number, number, number, number], on: () => void) {
-    const b = this.kit.obj(this.bar, "an_pill_" + id, [x, 0, 0])
+  /** `takes` = a tap on this pill ends the auto demo first (every pill except PAUSE / SPEED, which steer the running demo). */
+  private pill(id: string, text: string, x: number, z: number, w: number, color: [number, number, number, number], on: () => void, y: number = 0, takes: boolean = true): Text {
+    const b = this.kit.obj(this.bar, "an_pill_" + id, [x, y, 0])
     const f = this.kit.obj(b, "face")
     rrect(f, "plate", w, 2.0, 0.9, color, 0, {size: 0.12, color: [0.8, 0.95, 1, 0.9]})
-    label(f, "l", text, 19, new vec3(0, 0, 0.3), TEXT_LIGHT, true)
-    makeTap(this.kit.obj(f, "an_hit_" + id), new vec3(w + 0.4, 2.6, 2), () => (this.takeOver(), on()))
+    const lab = label(f, "l", text, 18, new vec3(0, 0, 0.3), TEXT_LIGHT, true)
+    makeTap(this.kit.obj(f, "an_hit_" + id), new vec3(w + 0.4, 2.6, 2), () => {
+      if (takes) this.takeOver()
+      on()
+    })
     this.pills[id] = b
+    return lab
   }
 
   private buildPills() {
     this.bar = this.kit.obj(this.root, "AnalyseToolbar")
-    this.pill("menu", "MENU", -8.6, 0, 4.4, [0.6, 0.25, 0.25, 0.95], () => this.onMenu && this.onMenu())
-    this.pill("demo", "WATCH DEMO", 8.0, 0, 6.0, [0.1, 0.5, 0.3, 0.95], () => (this.demoRunning ? this.stopDemo() : this.startDemo()))
+    // one line that says what to do (hidden while an info card is open), BACK TO MENU on the left, the demo switch on the right
+    this.instr = label(this.bar, "instr", "Tap an i to see what a part does", 26, new vec3(0, 5.0, 0), TEXT_LIGHT, true)
+    // the live status line of the auto demo (which part it is on, how far), below the table's front edge where nothing else is
+    this.hint = label(this.bar, "hint", "AUTO DEMO", 18, new vec3(0, -18.5, 0), TEXT_DIM)
+    this.hint.getSceneObject().enabled = false
+    this.tapLabel = label(this.work, "AnTapLabel", "", 18, vec3.zero(), TEXT_LIGHT, true)
+    this.tapLabel.getSceneObject().enabled = false
+    this.pill("menu", "BACK TO MENU", -7.4, 0, 6.6, [0.6, 0.25, 0.25, 0.95], () => this.onMenu && this.onMenu())
+    // the demo pill toggles the demo itself (WATCH DEMO <-> TAKE OVER): with `takes` it would stop the demo and then start it again
+    this.demoLabel = this.pill("demo", "WATCH DEMO", 7.6, 0, 6.2, [0.1, 0.5, 0.3, 0.95], () => (this.demoRunning ? this.stopDemo() : this.startDemo()), 0, false)
+    // second row: steer the running demo (they never end it)
+    // (in the free gap of the toolbar row: a row under it would sit on top of the car)
+    this.pauseLabel = this.pill("pause", "PAUSE", -1.9, 0, 3.5, [0.12, 0.3, 0.5, 0.95], () => {
+      this.ctl.togglePause()
+      this.syncCtl()
+    }, 0, false)
+    this.speedLabel = this.pill("speed", "SPEED x1", 2.0, 0, 3.7, [0.12, 0.3, 0.5, 0.95], () => {
+      this.ctl.cycleSpeed()
+      this.syncCtl()
+    }, 0, false)
+  }
+
+  private syncCtl() {
+    this.pauseLabel.text = this.ctl.paused ? "RESUME" : "PAUSE"
+    this.speedLabel.text = "SPEED x" + this.ctl.speed
+  }
+
+  demoPaused(): boolean {
+    return this.ctl.paused
+  }
+  demoSpeed(): number {
+    return this.ctl.speed
+  }
+  statusText(): string {
+    return this.hint.getSceneObject().enabled ? this.hint.text : ""
+  }
+  tapLabelText(): string {
+    return this.tapLabel.getSceneObject().enabled ? this.tapLabel.text : ""
   }
 
   // ------------------------------------------------------------------ the info card
@@ -197,6 +249,13 @@ export class GuideAnalyse {
     return this.cardAsk.enabled
   }
 
+  viewPoints(): vec3[] {
+    return [this.work.getTransform().getWorldPosition(), this.bar.getTransform().getWorldPosition()]
+  }
+  instructionText(): string {
+    return this.instr.text
+  }
+
   openPart(): string {
     return this.current
   }
@@ -242,19 +301,37 @@ export class GuideAnalyse {
       this.hand.setPinch(false)
     })
     s.wait(2.0)
-    for (const part of ["esp32", "l293d", "battery", "servo"]) {
+    this.ctl.reset()
+    this.syncCtl()
+    DEMO_PARTS.forEach((part, i) => {
       const tag = this.tags.filter((t) => t.part === part)[0]
-      s.tap(() => tag.iBtn.getTransform().getWorldPosition().add(new vec3(0, 0.3, 0.8)), 1.8, () => this.open(part))
-      s.wait(5.5) // read the card
+      s.call(() => this.demoStep(i, tag))
+      s.tap(() => tag.iBtn.getTransform().getWorldPosition().add(new vec3(0, 0.3, 0.8)), 1.8, () => {
+        this.tapLabel.getSceneObject().enabled = false
+        this.open(part)
+      })
+      s.wait(4.0) // read the card
       s.tap(() => tag.iBtn.getTransform().getWorldPosition().add(new vec3(0, 0.3, 0.8)), 1.0, () => this.toggle(part)) // second tap closes
-      s.wait(1.2)
-    }
+      s.wait(1.0)
+    })
+    s.call(() => (this.hint.text = "AUTO DEMO: a tap on the table closes any card"))
     s.tap(() => world(new vec3(0, 1.5, 7.5)), 1.4, () => undefined) // a tap on the table
     s.wait(1.5)
     this.ops = s.ops
     this.oi = 0
     this.demoRunning = true
     this.startedAt = getTime()
+    this.demoLabel.text = "TAKE OVER"
+    this.hint.text = "AUTO DEMO - tap TAKE OVER to explore yourself"
+    this.hint.getSceneObject().enabled = true
+  }
+
+  /** The demo status line + a floating "tap the i" label over the name plate the hand is about to press. */
+  private demoStep(i: number, tag: TagRt) {
+    this.hint.text = "AUTO DEMO " + (i + 1) + " / " + DEMO_PARTS.length + ": the hand taps the i of " + vizPart(tag.part).name
+    this.tapLabel.getSceneObject().getTransform().setLocalPosition(new vec3(tag.at.x, tag.at.y + 2.2, tag.at.z))
+    this.tapLabel.text = "tap the i: " + vizPart(tag.part).short
+    this.tapLabel.getSceneObject().enabled = true
   }
 
   stopDemo() {
@@ -262,6 +339,11 @@ export class GuideAnalyse {
     this.demoRunning = false
     this.ops = []
     this.hand.show(false)
+    this.demoLabel.text = "WATCH DEMO"
+    this.hint.getSceneObject().enabled = false
+    this.tapLabel.getSceneObject().enabled = false
+    this.ctl.reset()
+    this.syncCtl()
     if (this.onDemoEnd) this.onDemoEnd()
   }
 
@@ -272,6 +354,7 @@ export class GuideAnalyse {
     this.bar.getTransform().setWorldPosition(anchorWorld(new vec3(0, 4.6, -52)))
     // leader lines: from the component to its name plate; plates billboard with the table
     this.frame++
+    this.instr.getSceneObject().enabled = !this.card.enabled
     if (this.leadersDirty || this.frame % 12 === 0) {
       for (const t of this.tags) {
         const a = t.dot.getChild(0).getTransform().getWorldPosition()
@@ -288,7 +371,7 @@ export class GuideAnalyse {
     if (this.demoRunning) {
       const op = this.ops[this.oi]
       if (op === undefined) this.stopDemo()
-      else if (op(dt)) this.oi++
+      else if (op(this.ctl.step(dt))) this.oi++
     }
   }
 }

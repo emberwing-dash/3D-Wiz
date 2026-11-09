@@ -28,7 +28,7 @@ export class WizLeafG7 extends Scenario {
     const t0 = getTime()
     let sawWrong = false
     let sawMidStep = false
-    while (g.demoRunning() && getTime() - t0 < 260) {
+    while (g.demoRunning() && getTime() - t0 < 420) {
       if (g.bench.glowName() === "wrong") sawWrong = true
       if (g.stepIndex() >= 4 && g.stepIndex() < g.stepCount()) sawMidStep = true
       await sleep(250)
@@ -36,10 +36,10 @@ export class WizLeafG7 extends Scenario {
     const dur = getTime() - t0
     const s = g.demo.stats
     check(!g.demoRunning(), "the demo ended by itself in " + dur.toFixed(0) + " s")
-    check(dur > 90 && dur < 200, "paced for a video, about 2 minutes: " + dur.toFixed(0) + " s")
+    check(dur > 90 && dur < 330, "paced for a video, about 3 minutes for the 19-step build: " + dur.toFixed(0) + " s")
     check(s.finished, "the demo script reached its last step")
     check(g.stepIndex() === g.stepCount(), "all " + g.stepCount() + " steps done: idx=" + g.stepIndex())
-    check(g.bench.placedCount() === 3 && g.bench.wireDone("s3") && g.bench.wireDone("s8"), "3 parts placed, wires done")
+    check(g.bench.placedCount() === 8 && g.bench.wireDone("s3") && g.bench.wireDone("s8") && g.bench.wireDone("s15") && g.bench.wireDone("s19"), "8 parts placed, wires done: " + g.bench.placedCount())
     check(sawMidStep, "steps advanced one by one")
     check(sawWrong && s.wrongShown >= 1 && g.mistakeCount() >= 1, "one deliberate mistake was shown red: wrong=" + s.wrongShown + " mistakes=" + g.mistakeCount())
     check(g.orb.lastHint !== "", "the orb spoke the hint: " + g.orb.lastHint)

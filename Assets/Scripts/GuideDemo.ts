@@ -96,6 +96,15 @@ export class GuideDemo {
   stats: DemoStats = {exploded: false, modelLiftMax: 0, wrongShown: 0, playPressed: false, driveDistance: 0, finished: false}
   startedAt = -10
   onEnd: (() => void) | null = null
+  /** SPEED pill: 1 or 2. PACE is the showcase base pace, so x1 reads well in a recording (about 5 s per step) and x2 is a quick run. */
+  speed = 1
+  paused = false
+  private stepping = false
+  private stepFrom = -1
+  private realDt = 0
+  static PACE = 1.7
+  /** Stats of the showcase for tests: the hand reached each target, wire ends, placements. */
+  reached: string[] = []
   private ops: Op[] = []
   private i = 0
 
@@ -114,6 +123,10 @@ export class GuideDemo {
       ops.push((dt) => (t += dt) >= s)
     }
     const call = (f: () => void) => ops.push(() => (f(), true))
+    const waitReal = (sec: number) => {
+      let t = 0
+      ops.push(() => (t += this.realDt) >= sec)
+    }
     const until = (c: () => boolean, max: number) => {
       let t = 0
       ops.push((dt) => ((t += dt), c() || t >= max))
@@ -150,7 +163,7 @@ export class GuideDemo {
       this.hand.setPos(b.tableToWorld(new vec3(14, 8, 12)))
       this.hand.show(true)
       this.hand.setPinch(false)
-      g.orb.say("Auto demo. Watch the hand build the car. Click anywhere to take over.")
+      g.orb.say("Auto build. Watch the hand build the car. Grab any part, or press YOUR TURN, to take over.")
     })
     wait(4)
     // ---- explode and reassemble with the real pills
@@ -176,7 +189,7 @@ export class GuideDemo {
     moveTo(() => g.bench.model.worldPos().add(new vec3(0, 3.5, 1)), 1.8, 2)
     call(() => (home = g.bench.model.worldPos()))
     pinch(true)
-    moveTo(() => home.add(new vec3(7, 15, 4.5)), 2.4, 0, mv)
+    moveTo(() => home.add(new vec3(-2.5, 12, 4.5)), 2.4, 0, mv) // the hand starts 3.5 cm above the model: this lifts it about 8.5 cm
     wait(1.4)
     moveTo(() => home.add(new vec3(0, 3.5, 1)), 2.0, 0, mv)
     pinch(false)
@@ -203,7 +216,7 @@ export class GuideDemo {
           call(() => b.demoReleasePart(id))
           call(() => this.stats.wrongShown++)
           pinch(false)
-          wait(3.4) // red glow, the orb speaks the hint, the part goes back
+          waitReal(3.2) // red glow, the orb speaks the hint, the part goes back (real time: the return tween is not scaled)
           pick()
         }
         carry(() => {
@@ -211,6 +224,7 @@ export class GuideDemo {
           return lifted(l, 3.2)
         }, 2.4)
         call(() => b.demoReleasePart(id))
+        call(() => this.reached.push("place:" + id))
         pinch(false)
       } else {
         const pins = st.pins as [string, string]
@@ -224,6 +238,7 @@ export class GuideDemo {
             return lifted(l, 3.0).add(off)
           }, 2.1, 2.2, (p) => b.demoMoveEnd(e, p.sub(off)))
           call(() => b.demoReleaseEnd(e))
+          call(() => this.reached.push("pin:" + key))
           pinch(false)
         }
       }
@@ -273,6 +288,9 @@ export class GuideDemo {
   // ------------------------------------------------------------------ control
   start() {
     this.stats = {exploded: false, modelLiftMax: 0, wrongShown: 0, playPressed: false, driveDistance: 0, finished: false}
+    this.reached = []
+    this.paused = false
+    this.stepping = false
     this.build()
     this.i = 0
     this.running = true
@@ -288,9 +306,36 @@ export class GuideDemo {
     if (this.onEnd) this.onEnd()
   }
 
-  update(dt: number) {
-    this.hand.update(dt)
+  /** PAUSE / PLAY pill. */
+  togglePause(): void {
     if (!this.running) return
+    this.paused = !this.paused
+    this.stepping = false
+  }
+
+  /** STEP pill: run exactly one guide step, then hold at the start of the next. */
+  stepOnce(): void {
+    if (!this.running) return
+    this.stepFrom = this.g.stepIndex()
+    this.stepping = true
+    this.paused = false
+  }
+
+  /** SPEED pill: x1 <-> x2. */
+  cycleSpeed(): void {
+    this.speed = this.speed === 1 ? 2 : 1
+  }
+
+  update(realDt: number) {
+    this.hand.update(realDt)
+    if (!this.running) return
+    if (this.stepping && (this.g.stepIndex() !== this.stepFrom || this.g.phase() === "built")) {
+      this.stepping = false
+      this.paused = true
+    }
+    if (this.paused) return
+    this.realDt = realDt
+    const dt = realDt * this.speed * GuideDemo.PACE
     const op = this.ops[this.i]
     if (op === undefined) {
       this.stop()

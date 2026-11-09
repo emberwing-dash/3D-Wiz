@@ -30,10 +30,13 @@
   ScriptInputsHidden:
     benchScale: false
     boxMesh: false
+    circuitFiles: false
+    circuitPhoto: false
     cylinderMesh: false
     debugLog: false
     geminiKey: false
     geminiModel: false
+    groqModel: false
     litMaterial: false
     liveAi: false
     modelSource: false
@@ -45,6 +48,7 @@
     tableTiltDeg: false
     unlitMaterial: false
     userModel: false
+    userModels: false
   ScriptTypesHidden:
     {}
   ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
@@ -60,6 +64,11 @@
       litMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
       unlitMaterial: !<reference.Material> 00000000-0000-0000-0000-000000000000
       userModel: !<reference.ObjectPrefab> 00000000-0000-0000-0000-000000000000
+      userModels: !<reference.ObjectPrefab[]>
+        []
+      circuitFiles: !<reference.JsonAsset[]>
+        []
+      circuitPhoto: !<reference.Texture> 00000000-0000-0000-0000-000000000000
       startMode: guide
       modelSource: rc
       benchScale: 1.400000
@@ -70,6 +79,7 @@
       geminiKey: ""
       liveAi: false
       geminiModel: gemini-2.5-flash
+      groqModel: llama-3.3-70b-versatile
       debugLog: false
   ScriptTypes:
     -
@@ -84,6 +94,9 @@
     - '// @input Asset.Material litMaterial {"hint":"Lit glTF material"}'
     - '// @input Asset.Material unlitMaterial {"hint":"Unlit material (glow, panels)"}'
     - "// @input Asset.ObjectPrefab userModel {\"hint\":\"Optional: the user's imported FBX prefab (Assets/UserModels). Used when Model source is FBX.\"}"
+    - '// @input Asset.ObjectPrefab[] userModels {"hint":"LOAD MODEL list: import your FBX into Assets/UserModels, make it a prefab (right-click > Create Prefab), then drag it into this list. The MODEL picker on the BUILD page steps through RC car, the built-in sample models and this list."}'
+    - '// @input Asset.JsonAsset[] circuitFiles {"hint":"Circuits to build (JSON assets): a KiCad schematic wrapped by tools/wrap-kicad.mjs, a step list written by tools/video-to-pack.mjs, or the parts + connections a photo was read into. Each one shows up in the search list and on MY MODEL."}'
+    - '// @input Asset.Texture circuitPhoto {"hint":"A photo or picture of a circuit. The CONVERT PHOTO button on MY MODEL reads it with Gemini (needs the key and Live AI on) and turns it into a guided build."}'
     - '// @ui {"widget":"group_end"}'
     - '// @ui {"widget":"separator"}'
     - '// @ui {"widget":"group_start", "label":"Settings"}'
@@ -97,5 +110,6 @@
     - '// @input string geminiKey {"hint":"Gemini API key (optional). Better: put it in .env and run tools/apply-env.ps1 (see README). If you paste it here, CLEAR it before saving or committing. Never logged or echoed by the Lens. Empty here AND in .env = offline."}'
     - '// @input bool liveAi {"hint":"Live AI (Gemini). OFF = the demo is fully offline and instant: no network call is ever made. ON = Gemini only warms a cache in the background and powers ASK MORE; it never blocks or changes the demo."}'
     - '// @input string geminiModel = "gemini-flash-latest" {"hint":"Gemini model used for the intent and the step list (a small fast one)"}'
+    - '// @input string groqModel = "llama-3.3-70b-versatile" {"hint":"Groq model, used when the key starts with gsk_ (Groq keys use the OpenAI-compatible endpoint)"}'
     - '// @input bool debugLog {"hint":"Log steps and results (debug)"}'
     - '// @ui {"widget":"group_end"}'

@@ -140,3 +140,21 @@ export function placeSegment(holder: SceneObject, a: vec3, b: vec3, thick: numbe
   tr.setWorldRotation(dir.y < -0.9995 ? quat.fromEulerVec(new vec3(Math.PI, 0, 0)) : quat.rotationFromTo(vec3.up(), dir))
   holder.getChild(0).getTransform().setLocalScale(new vec3(thick, len / parentScale, thick))
 }
+
+/** A thin outline (12 edges) around a box of `size` cm: shows what the pointer is on WITHOUT covering it (a filled translucent box renders solid on this material). */
+export function outlineBox(kit: import("./WizParts").PartKit, parent: SceneObject, name: string, size: vec3, color: RGBA = [0.35, 0.95, 1, 1], thick: number = 0.14): SceneObject {
+  const root = kit.obj(parent, name)
+  const hx = size.x / 2
+  const hy = size.y / 2
+  const hz = size.z / 2
+  for (const sy of [-1, 1]) {
+    for (const sz of [-1, 1]) kit.shape(root, "box", [0, sy * hy, sz * hz], [size.x + thick, thick, thick], color, "ex", false)
+  }
+  for (const sx of [-1, 1]) {
+    for (const sz of [-1, 1]) kit.shape(root, "box", [sx * hx, 0, sz * hz], [thick, size.y + thick, thick], color, "ey", false)
+  }
+  for (const sx of [-1, 1]) {
+    for (const sy of [-1, 1]) kit.shape(root, "box", [sx * hx, sy * hy, 0], [thick, thick, size.z + thick], color, "ez", false)
+  }
+  return root
+}

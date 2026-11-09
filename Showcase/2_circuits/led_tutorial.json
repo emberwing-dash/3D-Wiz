@@ -1,0 +1,40 @@
+{
+ "title": "LED Circuit with Switch",
+ "parts": [
+  {
+   "ref": "BT1",
+   "type": "battery"
+  },
+  {
+   "ref": "SW1",
+   "type": "switch"
+  },
+  {
+   "ref": "R1",
+   "type": "resistor"
+  },
+  {
+   "ref": "D1",
+   "type": "led"
+  }
+ ],
+ "connections": [
+  [
+   "BT1.+",
+   "SW1.1"
+  ],
+  [
+   "SW1.2",
+   "R1.1"
+  ],
+  [
+   "R1.2",
+   "D1.A"
+  ],
+  [
+   "D1.K",
+   "BT1.-"
+  ]
+ ],
+ "source": "video"
+}

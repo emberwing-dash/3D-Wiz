@@ -5,18 +5,23 @@
 // Offline by design: the Lens runs fully from the saved step list. The Gemini key field below is NEVER written anywhere.
 
 import {PartKit} from "./WizParts"
-import {RC_SAMPLE, GuidePack, GuideStep, parseGuidePack} from "./GuideData"
+import {RC_SAMPLE, GuidePack, GuideStep, parseGuidePack, registerPack, packForProject} from "./GuideData"
+import {GuideMyModel, readyCircuits} from "./GuideMyModel"
+import {circuitFromKicad, circuitFromJson, circuitPrompt, packFromCircuit} from "./GuideImport"
+import {registerTutorial} from "./GuideVoice"
 import {GuideBench, BenchResult} from "./GuideBench"
 import {StepPanel, Orb, PlayButton, Controller} from "./GuideUI"
-import {makeTap, label, TEXT_LIGHT} from "./GuideKit"
+import {makeTap, label, TEXT_LIGHT, TEXT_DIM} from "./GuideKit"
 import {rrect} from "./WizUI"
 import {mainCamera} from "./WizPlacement"
 import {GuideDemo} from "./GuideDemo"
+import {GuideShowcase} from "./GuideShowcase"
 import {GuideVoice} from "./GuideVoiceUI"
+import {anchorWorld} from "./GuideUI"
 import {GuideViz} from "./GuideViz"
 import {GuideAnalyse} from "./GuideAnalyse"
-import {GeminiClient, pickKey} from "./GuideVoice"
-import {GEMINI_KEY_LOCAL} from "./GeminiKeyLocal"
+import {GeminiClient} from "./GuideVoice"
+import {GEMINI_KEY_LOCAL, GROQ_KEY_LOCAL} from "./GeminiKeyLocal"
 
 export type GuidePhase = "idle" | "working" | "success" | "built" | "play"
 
@@ -44,6 +49,18 @@ export class WizGuide extends BaseScriptComponent {
   @allowUndefined
   @hint("Optional: the user's imported FBX prefab (Assets/UserModels). Used when Model source is FBX.")
   userModel!: ObjectPrefab
+  @input
+  @allowUndefined
+  @hint("LOAD MODEL list: import your FBX into Assets/UserModels, make it a prefab (right-click > Create Prefab), then drag it into this list. The MODEL picker on the BUILD page steps through RC car, the built-in sample models and this list.")
+  userModels!: ObjectPrefab[]
+  @input
+  @allowUndefined
+  @hint("Circuits to build (JSON assets): a KiCad schematic wrapped by tools/wrap-kicad.mjs, a step list written by tools/video-to-pack.mjs, or the parts + connections a photo was read into. Each one shows up in the search list and on MY MODEL.")
+  circuitFiles!: JsonAsset[]
+  @input
+  @allowUndefined
+  @hint("A photo or picture of a circuit. The CONVERT PHOTO button on MY MODEL reads it with Gemini (needs the key and Live AI on) and turns it into a guided build.")
+  circuitPhoto!: Texture
   @ui.group_end
   @ui.separator
   @ui.group_start("Settings")
@@ -85,6 +102,9 @@ export class WizGuide extends BaseScriptComponent {
   @hint("Gemini model used for the intent and the step list (a small fast one)")
   geminiModel: string = "gemini-flash-latest"
   @input
+  @hint("Groq model, used when the key starts with gsk_ (Groq keys use the OpenAI-compatible endpoint)")
+  groqModel: string = "llama-3.3-70b-versatile"
+  @input
   @hint("Log steps and results (debug)")
   debugLog: boolean = false
   @ui.group_end
@@ -97,13 +117,16 @@ export class WizGuide extends BaseScriptComponent {
   controller!: Controller
   private play!: PlayButton
   demo!: GuideDemo
+  showcase!: GuideShowcase
   voice!: GuideVoice
   viz!: GuideViz
   analyse!: GuideAnalyse
   private gemini!: GeminiClient
-  private page: "none" | "build" | "analyse" | "viz" = "none"
+  private page: "none" | "build" | "analyse" | "viz" | "mymodel" = "none"
+  private mymodel: GuideMyModel | null = null
   /** Set by WizMain: opens an old 3D Wiz page (lab / projects / visualize) from a page button. */
   static onLegacy: ((id: string) => void) | null = null
+  static onError: ((msg: string) => void) | null = null
   /** Set by WizMain: true while the 3D Wiz title screen is the current page. */
   static isTitle: () => boolean = () => false
   private demoLabel!: Text
@@ -115,6 +138,9 @@ export class WizGuide extends BaseScriptComponent {
   private root!: SceneObject
   private legacyOff: SceneObject[] = []
   private oldBar!: SceneObject
+  private oldRow!: SceneObject
+  private moreLabel!: Text
+  private takeOverHint!: Text
   /** Set by WizMain: the Guide's MENU button returns to the 3D Wiz title screen. */
   static onExit: (() => void) | null = null
   private built = false
@@ -130,15 +156,16 @@ export class WizGuide extends BaseScriptComponent {
     WizGuide.instance = this
     this.createEvent("OnStartEvent").bind(() => {
       this.ensureKit()
-      this.gemini = new GeminiClient(() => this.effectiveKey(), () => this.geminiModel, (s, f) => this.later(s, f), () => this.liveAi)
+      this.gemini = new GeminiClient(() => this.effectiveKey(), () => this.geminiModel, (s, f) => this.later(s, f), () => this.liveAi, () => this.groqModel, () => this.groqKeyNow())
       this.voice = new GuideVoice(this, this.kit, this.gemini)
+      this.loadImports()
       if (this.startMode === "guide") this.enter()
       else this.prewarm()
     })
     this.createEvent("UpdateEvent").bind(() => this.update(getDeltaTime()))
     // a mouse click / touch anywhere takes over from the auto demo (ignored for a moment after it starts: the click that started it)
     this.createEvent("TouchStartEvent").bind(() => {
-      if (this.demo && this.demo.running && getTime() - this.demo.startedAt > 1.0) this.stopDemo()
+      // the build demo is NOT stopped by a click: its own pills (PAUSE / STEP / SPEED) are clicked while it runs. Grab a part or press MODE to take over.
       if (this.voice && this.voice.isRunning() && getTime() - this.voice.startedAt > 1.0) this.voice.takeOver()
       if (this.viz && this.viz.demoRunning && getTime() - this.viz.startedAt > 1.0) this.viz.stopDemo()
       if (this.analyse && this.analyse.demoRunning && getTime() - this.analyse.startedAt > 1.0) this.analyse.stopDemo()
@@ -182,6 +209,64 @@ export class WizGuide extends BaseScriptComponent {
     if (WizGuide.onExit !== null) WizGuide.onExit()
   }
 
+  // ------------------------------------------------------------------ imported circuits (KiCad file / photo / video JSON)
+  imported: {id: string; title: string; from: string}[] = []
+  private importNote = ""
+
+  importNoteText(): string {
+    return this.importNote
+  }
+
+  /** Register a pack so it appears in the search list and on MY MODEL. */
+  addImported(pack: GuidePack, from: string): string {
+    const id = "import-" + (this.imported.length + 1)
+    registerPack(id, pack)
+    registerTutorial({id: id, title: pack.title.length > 22 ? pack.title.substring(0, 22) : pack.title, blurb: "From " + from, tags: pack.title.toLowerCase().split(" ").concat([from.toLowerCase()]), ready: true})
+    this.imported.push({id: id, title: pack.title, from: from})
+    return id
+  }
+
+  /** A KiCad schematic (text of a .kicad_sch) -> guided build. Throws a readable message when it cannot be built. */
+  importKicad(text: string, title: string): string {
+    const circuit = circuitFromKicad(text, title)
+    const pack = packFromCircuit(circuit, "Built from a KiCad schematic" + (circuit.skipped.length > 0 ? " (" + circuit.skipped.length + " items left out: no 3D model)" : ""))
+    return this.addImported(pack, "KiCad")
+  }
+
+  /** JSON text: a KiCad schematic wrapper {"kicad_sch": "..."}, a complete step list (tools/video-to-pack.mjs), or the parts + connections a vision model read from a photo. */
+  importJson(text: string, from: string): string {
+    const o = JSON.parse(text.trim().replace(/^```json\s*/i, "").replace(/```$/, ""))
+    if (o && typeof o.kicad_sch === "string") return this.importKicad(o.kicad_sch, typeof o.title === "string" ? o.title : "KiCad circuit")
+    const src = typeof o.source === "string" ? o.source : from
+    const pack = o && o.steps ? parseGuidePack(JSON.stringify(o)) : packFromCircuit(circuitFromJson(JSON.stringify(o)), "Read from a " + src)
+    return this.addImported(pack, src)
+  }
+
+  private loadImports(): void {
+    const errs: string[] = []
+    if (this.circuitFiles) {
+      for (let i = 0; i < this.circuitFiles.length; i++) {
+        try {
+          this.importJson(this.circuitFiles[i].getString(), "file")
+        } catch (e) {
+          errs.push(this.circuitFiles[i].name + ": " + e)
+        }
+      }
+    }
+    this.importNote = errs.length > 0 ? errs[0].substring(0, 70) : ""
+    if (errs.length > 0) print("[WizGuide] import problems: " + errs.join(" | "))
+  }
+
+  /** CONVERT PHOTO: the Inspector picture goes to Gemini (vision) and comes back as a guided build. */
+  async convertPhoto(): Promise<string> {
+    if (!this.circuitPhoto || isNull(this.circuitPhoto)) throw new Error("no photo set in the Inspector (CircuitGuide > circuitPhoto)")
+    const b64: string = await new Promise((res, rej) => {
+      Base64.encodeTextureAsync(this.circuitPhoto, (s: string) => res(s), () => rej(new Error("could not read the picture")), CompressionQuality.IntermediateQuality, EncodingType.Jpg)
+    })
+    const text = await this.gemini.vision(circuitPrompt(), b64, "image/jpeg")
+    return this.importJson(text, "photo")
+  }
+
   usePack(p: GuidePack): void {
     this.pack = p
     if (this.built) this.rebuildWorld()
@@ -206,14 +291,19 @@ export class WizGuide extends BaseScriptComponent {
     this.sleepLegacy()
     if (!this.built) this.build()
     this.hidePages()
+    this.anchorPages()
     this.page = "build"
     this.root.enabled = true
     this.guideOn = true
     this.restart()
+    // the earlier pages stay out of the first view on every entry: MORE opens them (not left open from the last visit)
+    this.oldRow.enabled = false
+    this.moreLabel.text = "MORE"
     this.lastEnterMs = Date.now() - t0
   }
 
   private hidePages() {
+    if (this.mymodel) this.mymodel.show(false)
     if (this.viz) this.viz.show(false)
     if (this.analyse) this.analyse.show(false)
     if (this.built) this.root.enabled = false
@@ -249,16 +339,76 @@ export class WizGuide extends BaseScriptComponent {
   }
   private pagesRoot: SceneObject | null = null
 
+  /** Put the page roots in front of where the user is looking NOW (position + heading of the camera), so a page can never open behind the user. */
+  private anchorPages() {
+    const cam = mainCamera()
+    if (!cam) return
+    const t = cam.getTransform()
+    const p = t.getWorldPosition()
+    const d = t.getWorldRotation().multiplyVec3(new vec3(0, 0, -1))
+    const q = quat.fromEulerVec(new vec3(0, Math.atan2(-d.x, -d.z), 0))
+    for (const o of [this.root, this.pagesRoot]) {
+      if (!o) continue
+      o.getTransform().setWorldPosition(p)
+      o.getTransform().setWorldRotation(q)
+    }
+  }
+
   /** The VISUALIZE page: the printed RC car large on the table and real component models to attach. */
   enterViz(): void {
     const t0 = Date.now()
     this.sleepLegacy()
     this.ensurePages()
     this.hidePages()
+    this.anchorPages()
     this.page = "viz"
     this.guideOn = true
     this.viz.show(true)
     this.lastEnterMs = Date.now() - t0
+  }
+
+  /** The MY MODEL page: pick your 3D model and a circuit, then attach one to the other. */
+  enterMyModel(): void {
+    const t0 = Date.now()
+    this.sleepLegacy()
+    this.ensureMyModel()
+    this.hidePages()
+    this.anchorPages()
+    this.page = "mymodel"
+    this.guideOn = true
+    ;(this.mymodel as GuideMyModel).show(true)
+    this.lastEnterMs = Date.now() - t0
+  }
+
+  private ensureMyModel() {
+    this.ensureKit()
+    if (this.mymodel) return
+    this.mymodel = new GuideMyModel(this.kit, this.sceneRoot(), {
+      modelNames: () => this.modelNames(),
+      circuits: () => readyCircuits(),
+      start: (m, c) => this.startMyModel(m, c),
+      convertPhoto: () => this.convertPhoto(),
+      menu: () => this.exitToMenu(),
+    })
+  }
+
+  myModelPage(): GuideMyModel | null {
+    return this.mymodel
+  }
+
+  /** START BUILD on MY MODEL: that circuit on that model, with the glowing-spot guide. */
+  startMyModel(modelIndex: number, circuitId: string): void {
+    const l = this.modelList()
+    const m = l[((modelIndex % l.length) + l.length) % l.length]
+    this.modelIdx = l.indexOf(m)
+    this.modelSource = m.prefab === null ? "rc" : "fbx"
+    this.pack = packForProject(circuitId)
+    this.stopDemo()
+    if (this.built) this.rebuildWorld()
+    this.enter()
+    this.bench.buildModel(m.prefab === null ? "rc" : "fbx", m.prefab)
+    this.restart()
+    this.orb.say("Attach the " + this.pack.title.split(":")[0] + " to " + (m.prefab === null ? "the RC car" : m.name) + ". Follow the glowing spots.")
   }
 
   /** The ANALYSE page: name tags and info buttons over a real-looking RC car. */
@@ -267,6 +417,7 @@ export class WizGuide extends BaseScriptComponent {
     this.sleepLegacy()
     this.ensurePages()
     this.hidePages()
+    this.anchorPages()
     this.page = "analyse"
     this.guideOn = true
     this.analyse.show(true)
@@ -274,16 +425,25 @@ export class WizGuide extends BaseScriptComponent {
   }
 
   /** Menu entries: with HANDS AUTO on, the simulated hand starts working on the page by itself. */
-  enterFromMenu(page: "build" | "analyse" | "viz"): void {
-    if (page === "build") {
-      this.enter()
-      if (this.voice.autoHands) this.startDemo()
-    } else if (page === "viz") {
-      this.enterViz()
-      if (this.voice.autoHands) this.viz.startDemo()
-    } else {
-      this.enterAnalyse()
-      if (this.voice.autoHands) this.analyse.startDemo()
+  enterFromMenu(page: "build" | "analyse" | "viz" | "mymodel"): void {
+    try {
+      if (page === "mymodel") {
+        this.enterMyModel()
+      } else if (page === "build") {
+        this.enter()
+        if (this.voice.autoHands) this.startDemo()
+      } else if (page === "viz") {
+        this.enterViz()
+        if (this.voice.autoHands) this.viz.startDemo()
+      } else {
+        this.enterAnalyse()
+        if (this.voice.autoHands) this.analyse.startDemo()
+      }
+    } catch (e) {
+      // never fail silently: say so, and put the user back on the main menu
+      print("[WizGuide] page " + page + " failed: " + e)
+      this.leave()
+      if (WizGuide.onError !== null) WizGuide.onError(String(e).substring(0, 60))
     }
   }
 
@@ -323,21 +483,39 @@ export class WizGuide extends BaseScriptComponent {
 
   /** The key in use: the Inspector field first, else the generated local module (from .env, tools/apply-env.ps1), else none (offline). */
   private effectiveKey(): string {
-    return pickKey(this.geminiKey, GEMINI_KEY_LOCAL)
+    const i = this.geminiKey.trim()
+    return i.length > 0 && i.indexOf("gsk_") !== 0 ? i : GEMINI_KEY_LOCAL.trim()
+  }
+
+  /** The Groq key: an Inspector key that starts with gsk_, else the .env module. Never logged. */
+  private groqKeyNow(): string {
+    const i = this.geminiKey.trim()
+    return i.indexOf("gsk_") === 0 ? i : GROQ_KEY_LOCAL.trim()
   }
 
   /** For logs: never the key itself. */
   keyStatus(): string {
     const a = this.geminiKey.trim().length
     const b = GEMINI_KEY_LOCAL.trim().length
+    const c = GROQ_KEY_LOCAL.trim().length
     if (a > 0) return "set, " + a + " chars (Inspector)"
+    if (c > 0) return "set, " + c + " chars (.env module, Groq)"
     if (b > 0) return "set, " + b + " chars (.env module)"
     return "empty"
   }
 
   /** For tests: lengths of each source, never values. */
   keySources(): {inspector: number; local: number} {
-    return {inspector: this.geminiKey.trim().length, local: GEMINI_KEY_LOCAL.trim().length}
+    return {inspector: this.geminiKey.trim().length, local: GEMINI_KEY_LOCAL.trim().length + GROQ_KEY_LOCAL.trim().length}
+  }
+
+  /** World points that must be inside the camera view when the page is open. */
+  viewPoints(): vec3[] {
+    if (this.page === "viz") return this.viz.viewPoints()
+    if (this.page === "analyse") return this.analyse.viewPoints()
+    if (this.page === "mymodel" && this.mymodel) return [this.mymodel.root.getTransform().getWorldPosition()]
+    if (this.page === "build") return [this.bench.work.getTransform().getWorldPosition(), this.panel.root.getTransform().getWorldPosition()]
+    return []
   }
 
   pageName(): string {
@@ -393,13 +571,15 @@ export class WizGuide extends BaseScriptComponent {
     this.bench.onGrab = () => {
       if (this.ph === "working") this.orb.hold(true)
     }
-    this.panel = new StepPanel(this.kit, this.panelWidthCm, new vec3(-2, 10.5, -60))
+    this.panel = new StepPanel(this.kit, this.panelWidthCm, new vec3(-5.5, 10.5, -60))
     const od = this.orbDistanceCm
+    // left of the table, below the step panel: the right side belongs to the video panel and the PAUSE / STEP / SPEED / MODE pills
     this.orb = new Orb(this.kit, new vec3(od * 0.152, od * 0.12, -od * 0.92))
     this.play = new PlayButton(this.kit, this.bench.work, new vec3(0, 0.6, 5.4), () => this.pressPlay())
     this.controller = new Controller(this.kit, this.bench.work, new vec3(0, 0.6, 5.6))
     this.buildModelButtons()
     this.demo = new GuideDemo(this, this.kit, this.root)
+    this.showcase = new GuideShowcase(this, this.kit, this.root)
     this.demo.onEnd = () => this.onDemoEnd()
     this.bench.onBlockedGrab = () => this.stopDemo()
     this.root.getTransform()
@@ -408,6 +588,7 @@ export class WizGuide extends BaseScriptComponent {
   }
 
   private rebuildWorld() {
+    if (this.showcase) this.showcase.root.destroy()
     this.bench.work.destroy()
     this.panel.root.destroy()
     this.orb.root.destroy()
@@ -432,8 +613,10 @@ export class WizGuide extends BaseScriptComponent {
     mk("assemble", "ASSEMBLE", 2.5, () => this.bench.model.assemble())
     // the earlier 3D Wiz pages stay reachable from here: a small row on the bottom edge of the view (nothing can hide it)
     this.oldBar = this.kit.obj(this.root, "GuideOldBar")
+    this.oldRow = this.kit.obj(this.oldBar, "GuideOldRow", [0, 2.8, 0])
+    this.oldRow.enabled = false // the earlier pages stay out of the first view: MORE opens them
     const mkOld = (id: string, text: string, x: number, legacyId: string) => {
-      const o = this.kit.obj(this.oldBar, "guide_btn_old_" + id, [x, 0, 0])
+      const o = this.kit.obj(this.oldRow, "guide_btn_old_" + id, [x, 0, 0])
       const of = this.kit.obj(o, "face")
       rrect(of, "plate_" + id, id === "view" ? 3.8 : 4.4, 1.9, 0.9, [0.2, 0.3, 0.3, 0.95], 0, {size: 0.12, color: [0.8, 0.95, 1, 0.9]})
       label(of, "label_" + id, text, 17, new vec3(0, 0, 0.3), TEXT_LIGHT, true)
@@ -442,14 +625,24 @@ export class WizGuide extends BaseScriptComponent {
     mkOld("lab", "OLD LAB", -5.0, "lab")
     mkOld("library", "LIBRARY", 0, "projects")
     mkOld("view", "OLD VIEW", 5.0, "visualize")
+    const more = this.kit.obj(this.oldBar, "guide_btn_more_root", [0, 0, 0])
+    const mf = this.kit.obj(more, "face")
+    rrect(mf, "plate_more", 3.8, 1.7, 0.85, [0.2, 0.3, 0.3, 0.9], 0, {size: 0.1, color: [0.7, 0.85, 0.9, 0.9]})
+    this.moreLabel = label(mf, "label_more", "MORE", 16, new vec3(0, 0, 0.3), TEXT_LIGHT, true)
+    makeTap(this.kit.obj(mf, "guide_btn_hit_more"), new vec3(4.2, 2.2, 2.2), () => {
+      this.oldRow.enabled = !this.oldRow.enabled
+      this.moreLabel.text = this.oldRow.enabled ? "LESS" : "MORE"
+    })
+    this.takeOverHint = label(this.root, "TakeOverHint", "AUTO BUILD - grab a part or press MODE to take over", 17, new vec3(0, 0, 0), TEXT_DIM)
+    this.takeOverHint.getSceneObject().enabled = false
     // a fixed MENU button on the table: every page can go back to the 3D Wiz main menu
-    const m = this.kit.obj(this.bench.work, "guide_btn_menu_root", [8.6, 0.5, 7.4])
+    const m = this.kit.obj(this.bench.work, "guide_btn_menu_root", [7.4, 0.5, 7.5])
     const face = this.kit.obj(m, "face")
     face.getTransform().setLocalRotation(quat.fromEulerVec(new vec3(-0.6, 0, 0)))
-    rrect(face, "plate_menu", 4.6, 2.1, 1.0, [0.6, 0.25, 0.25, 0.95], 0, {size: 0.14, color: [1, 0.65, 0.65, 0.95]})
-    label(face, "label_menu", "MENU", 22, new vec3(0, 0, 0.3), TEXT_LIGHT, true)
+    rrect(face, "plate_menu", 6.6, 2.1, 1.0, [0.6, 0.25, 0.25, 0.95], 0, {size: 0.14, color: [1, 0.65, 0.65, 0.95]})
+    label(face, "label_menu", "BACK TO MENU", 17, new vec3(0, 0, 0.3), TEXT_LIGHT, true)
     const hit = this.kit.obj(face, "guide_btn_hit_menu")
-    makeTap(hit, new vec3(5.2, 2.8, 2.2), () => this.exitToMenu())
+    makeTap(hit, new vec3(7.0, 2.8, 2.2), () => this.exitToMenu())
     // WATCH DEMO / STOP DEMO: one big pill; the auto demo plays the whole guide with a simulated hand
     const d = this.kit.obj(this.bench.work, "guide_btn_demo_root", [4.6, 0.5, -7.7])
     const df = this.kit.obj(d, "face")
@@ -465,7 +658,7 @@ export class WizGuide extends BaseScriptComponent {
     if (this.demo.running) return
     this.restart()
     this.bench.setEnabled(false) // the simulated hand is the only hand; a real grab ends the demo
-    this.demoLabel.text = "STOP DEMO"
+    this.demoLabel.text = "TAKE OVER"
     this.demo.start()
   }
 
@@ -482,6 +675,100 @@ export class WizGuide extends BaseScriptComponent {
 
   demoRunning(): boolean {
     return this.demo !== undefined && this.demo.running
+  }
+
+  // ------------------------------------------------------------------ showcase controls
+  demoPaused(): boolean {
+    return this.demo !== undefined && this.demo.running && this.demo.paused
+  }
+  demoSpeed(): number {
+    return this.demo ? this.demo.speed : 1
+  }
+  toggleDemoPause(): void {
+    if (this.demo.running) this.demo.togglePause()
+    else this.startDemo()
+  }
+  stepDemo(): void {
+    if (!this.demo.running) this.startDemo()
+    this.demo.stepOnce()
+  }
+  cycleDemoSpeed(): void {
+    this.demo.cycleSpeed()
+  }
+  /** MODE pill: DEMO plays by itself; YOUR TURN shows the same outlines and waits for the user's own drops. */
+  toggleYourTurn(): void {
+    if (this.demo.running) {
+      this.stopDemo()
+      if (this.ph === "built" || this.ph === "play") this.restart()
+    } else this.startDemo()
+  }
+  yourTurn(): boolean {
+    return !this.demoRunning()
+  }
+  isPartPlaced(id: string): boolean {
+    return this.bench.isPlaced(id)
+  }
+  partLabel(id: string): string {
+    const p = this.pack.parts.filter((x) => x.id === id)[0]
+    return p ? p.label : id
+  }
+  /** One short word for the storyboard slots. */
+  partShort(id: string): string {
+    const l = this.partLabel(id)
+    const w = l.split(" ")[0]
+    return w.length > 7 ? w.substring(0, 7) : w
+  }
+
+  // ------------------------------------------------------------------ LOAD MODEL (picker)
+  private models: {name: string; prefab: ObjectPrefab | null}[] | null = null
+  private modelIdx = 0
+
+  private modelList(): {name: string; prefab: ObjectPrefab | null}[] {
+    if (this.models !== null) return this.models
+    const out: {name: string; prefab: ObjectPrefab | null}[] = [{name: "RC car", prefab: null}]
+    const add = (name: string, pf: ObjectPrefab | null | undefined) => {
+      if (pf === null || pf === undefined || isNull(pf)) return
+      const nm = name.replace(/_cm$/, "")
+      if (out.some((o) => o.name === nm)) return
+      out.push({name: nm, prefab: pf})
+    }
+    if (this.userModel) add((this.userModel as any).name ? String((this.userModel as any).name) : "Your model", this.userModel)
+    try {
+      add("MicroD", requireAsset("../UserModels/MicroD_cm.prefab") as ObjectPrefab)
+      add("MyModel", requireAsset("../UserModels/MyModel_cm.prefab") as ObjectPrefab)
+    } catch (e) {
+      print("[WizGuide] built-in sample models unavailable: " + e)
+    }
+    const list = this.userModels ? this.userModels : []
+    for (let i = 0; i < list.length; i++) add((list[i] as any) && (list[i] as any).name ? String((list[i] as any).name) : "Model " + (i + 1), list[i])
+    this.models = out
+    return out
+  }
+
+  modelCount(): number {
+    return this.modelList().length
+  }
+  modelIndex(): number {
+    return this.modelIdx
+  }
+  modelName(): string {
+    const l = this.modelList()
+    return l[this.modelIdx % l.length].name
+  }
+  modelNames(): string[] {
+    return this.modelList().map((m) => m.name)
+  }
+
+  /** Step the MODEL picker (-1 / +1): the chosen model is fitted to bench scale, split into grabbable parts, and works with EXPLODE / ASSEMBLE. */
+  pickModel(delta: number): void {
+    const l = this.modelList()
+    this.modelIdx = (this.modelIdx + delta + l.length * 4) % l.length
+    const m = l[this.modelIdx]
+    this.stopDemo()
+    this.modelSource = m.prefab === null ? "rc" : "fbx"
+    this.bench.buildModel(m.prefab === null ? "rc" : "fbx", m.prefab)
+    this.restart()
+    this.orb.say(m.prefab === null ? "RC car loaded." : m.name + " loaded: grab a part, or press EXPLODE.")
   }
 
   pillWorld(id: string): vec3 {
@@ -566,6 +853,13 @@ export class WizGuide extends BaseScriptComponent {
     if (this.ph !== "built") return
     this.ph = "play"
     this.play.show(false)
+    if (this.pack.controller === "none") {
+      // a circuit without a vehicle: Play switches it on (the LED lights up)
+      this.bench.setLedLit(true)
+      this.orb.chime()
+      this.orb.say("It works! The LED is lit. Press WATCH DEMO or BACK TO MENU.")
+      return
+    }
     this.bench.model.assemble()
     const servo = this.pack.controller === "servo"
     this.controller.open(servo ? "servo" : "car", servo ? Math.min(4, this.bench.model.parts.length) : 0)
@@ -605,12 +899,18 @@ export class WizGuide extends BaseScriptComponent {
     }
     if (this.viz && this.viz.root.enabled) this.viz.update(dt)
     if (this.analyse && this.analyse.root.enabled) this.analyse.update(dt)
+    if (this.takeOverHint) {
+      const on = this.page === "build" && this.demo && this.demo.running
+      if (this.takeOverHint.getSceneObject().enabled !== on) this.takeOverHint.getSceneObject().enabled = on
+      if (on) this.takeOverHint.getSceneObject().getTransform().setWorldPosition(anchorWorld(new vec3(-2, 3.6, -58)))
+    }
     if (this.oldBar && this.page === "build") {
       const cam = mainCamera()
       if (cam) this.oldBar.getTransform().setWorldPosition(cam.screenSpaceToWorldSpace(new vec2(0.5, 0.95), 44))
     }
     if (!this.guideOn || !this.built || this.page !== "build") return
     this.bench.update(dt)
+    this.showcase.update(dt)
     this.demo.update(dt)
     this.panel.update(dt)
     this.orb.update(dt)
@@ -630,6 +930,7 @@ export class WizGuide extends BaseScriptComponent {
   }
 
   private drive(dt: number) {
+    if (this.pack.controller === "none") return
     const m = this.bench.model
     const v = this.controller.v
     if (this.controller.mode === "car") {

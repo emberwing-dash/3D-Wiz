@@ -36,7 +36,8 @@ export class WizLeafG4 extends Scenario {
     const c = g.bench.glowRgba()
     check(c.y > 0.8 && c.x < 0.5 && c.z < 0.7, "green glow: " + c.x.toFixed(2) + "," + c.y.toFixed(2) + "," + c.z.toFixed(2))
     check(!g.orb.isHeld(), "narration carries on when the step is complete")
-    await sleep(900)
+    // the line being spoken finishes first (about 0.06 s per character), then the queued lines go on
+    for (let w = 0; w < 100 && !g.orb.log.some((l) => l === "say: " + s1.after); w++) await sleep(100)
     check(g.orb.log.some((l) => l === "say: " + s1.after) || g.orb.caption().replace(/\n/g, " ") === s1.after || g.orb.log.some((l) => l === "say: QUEUED LINE"), "narration carried on after the step: " + g.orb.log.join(" / "))
     // next step starts by itself
     await sleep((g.successHoldS + 0.4) * 1000)

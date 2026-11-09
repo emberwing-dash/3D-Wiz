@@ -30,7 +30,7 @@ export class WizLeafG6 extends Scenario {
     await sleep(600)
     await openMenu(main)
     const ids = main.menu.itemIds().filter((i) => i !== "continue")
-    check(ids.length === 3 && ids.indexOf("viz3d") >= 0 && ids.indexOf("analyse") >= 0 && ids.indexOf("build") >= 0, "the main menu is exactly Visualize / Analyse / Build: " + ids.join(","))
+    check(ids.length === 4 && ids.indexOf("viz3d") >= 0 && ids.indexOf("analyse") >= 0 && ids.indexOf("build") >= 0 && ids.indexOf("mymodel") >= 0, "the main menu is Visualize / Analyse / Build / My Model: " + ids.join(","))
     const root = findSceneObjectByName("3DWiz")
     check(!!root && root.isEnabledInHierarchy && !g.active(), "the original 3D Wiz is showing, the pages are asleep")
 
@@ -59,6 +59,7 @@ export class WizLeafG6 extends Scenario {
 
     // the old Lab and old Visualize through the BUILD pills, each with its own Back
     await press(it, "menu_icon_build", 1200)
+    await press(it, "guide_btn_hit_more", 400) // the earlier pages are behind MORE, out of the first view
     await press(it, "guide_btn_hit_old_lab", 1500)
     check(!g.active() && (main.getDebug().mode === "lab" || main.getDebug().mode === "circuit"), "OLD LAB opened the Circuit Lab: " + main.getDebug().mode)
     await openMenu(main)
@@ -67,6 +68,7 @@ export class WizLeafG6 extends Scenario {
     check(main.getDebug().mode === "launch", "Lab Back returned to the main menu")
     await openMenu(main)
     await press(it, "menu_icon_build", 1200)
+    await press(it, "guide_btn_hit_more", 400)
     await press(it, "guide_btn_hit_old_view", 1500)
     check(main.getDebug().mode === "visualize", "OLD VIEW opened the old Visualize: " + main.getDebug().mode)
     await openMenu(main)

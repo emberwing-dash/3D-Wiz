@@ -133,3 +133,28 @@ BRIEF DEVIATION (user direction): the product is a main menu with three pages; l
 
 ## Update (Nov 3): .env key path
 - User-requested exception to the "Inspector only" rule: `.env` (git-ignored, one empty line `GEMINI_API_KEY=`), `.env.example`, `tools/apply-env.ps1` (reads `.env`, writes `Assets/Scripts/GeminiKeyLocal.ts`, never prints the key), and a committed empty stub `GeminiKeyLocal.ts` so a fresh clone compiles. Key order: Inspector field, else the .env module, else offline (`pickKey`, unit-tested in g8). README has a "Live AI key" section.
+
+## Update (Nov 6): dead Visualize / Analyse taps, simpler flow (code done, NOT run - Lens Studio MCP was down)
+- Folder check: Lens Studio has proj\3D_Wiz_5.23.1 open (lock file + today's log); work was done there and synced to the git folder (no deletions, key/env/local files excluded).
+- Root cause: not reproduced (no MCP, no script errors in the log). Best explanation: page content was world-anchored, so after the camera moved or turned the page opened out of view or behind the user, and any failure was silent. Fix: pages are anchored to the camera at the moment of the tap (anchorPages), enterFromMenu has try/catch with a toast and return to the title, WizMain guards a missing WizGuide.
+- Flow: title = VISUALIZE / ANALYSE / BUILD big buttons + the voice button. Each page starts with a one-line instruction at the top and has BACK TO MENU. The simulated hand starts on every page, with a TAKE OVER hint (pill toggles WATCH DEMO / TAKE OVER). OLD LAB / LIBRARY / OLD VIEW and debug pills are behind a small MORE.
+- Tests: g6 now presses MORE first; new g13-menu-pages-in-view (real menu taps, page enabled, content points inside camera view, also when the user turned away, instruction text, hand auto-start, BACK TO MENU). Only tsc type-check was run (clean). All LEAF (c1-c14, x-pack, g1-g13) must be re-run once MCP is back.
+- Untested: everything at runtime, view-edge margins, text overlap, timings (< 1 s target).
+
+## Update (Nov 8): auto build showcase, tutorial storyboard, YOUR TURN, model picker, Groq provider (code written and type-checked; NOT run)
+Lens Studio MCP stayed unreachable from the builder session (ECONNREFUSED), so NOTHING below was run in the preview. No LEAF result, screenshot or latency exists for it. Status per item:
+- Auto build (BUILD page starts it by itself; hand carries parts to the glowing outline, drags wire ends pin to pin, one deliberate red mistake, then Play): hand + wrong placement + wires existed already; now paced for recording (x1 about 5 s per step, x2) - UNTESTED.
+- Controls PAUSE / STEP / SPEED x1 x2 / MODE (DEMO or YOUR TURN): written (GuideShowcase.ts, GuideDemo.ts) - UNTESTED. A click anywhere no longer stops the build demo (it would have fought the new pills); grabbing a part or MODE takes over.
+- In-space outline guide: glowing spot + new arrow from part to target + "<part> here" label; wire steps label both pins - UNTESTED. The faint "next step" preview is a NEXT line in the video panel, not a 3D ghost.
+- Tutorial video panel (animated storyboard stand-in, caption, progress bar, status) next to the work area, right side - UNTESTED, layout and edge margins unseen.
+- Grab targets: part hover halo (cyan) and model hover halo added; parts already had large colliders - UNTESTED.
+- Model picker (LOAD MODEL < >): list = RC car, built-in MicroD and MyModel prefabs, Inspector `userModels` (ObjectPrefab[]); README has the import steps - UNTESTED.
+- NOT done: the step list is still the RC sample (ESP32, L293D, servo). LED, resistor, battery holder, motor and switch steps were not added to the guide data (risk to existing tests without a run).
+- VISUALIZE / ANALYSE auto showcases: unchanged since the earlier version (they start by themselves); no new "labelled attach" work - UNTESTED in this round.
+- LEAF: g14 auto-build-showcase, g15 your-turn-interaction, g16 model-picker written and registered; g8 extended with provider / key-order checks; g6/g13 updated earlier. None run. Full re-run (c1-c14, x-pack, g1-g16) still to do.
+- Groq: client supports both providers (key prefix gsk_ = Groq, OpenAI-compatible endpoint, Bearer header, JSON mode, default model llama-3.3-70b-versatile via the groqModel input). Visible intent prefers Groq, step lists / ASK MORE prefer Gemini, with the other as fallback and the local match as last fallback. Cache, in-flight sharing, call cap, timeouts unchanged. tools/apply-env.ps1 reads GROQ_API_KEY too. NOT verified live: neither .env contains a GROQ_API_KEY line (only GEMINI_API_KEY, an AQ. key of 53 chars), so no Groq call or model-name check was possible and no Groq latency exists.
+- apply-env.ps1 was run once for the proj folder (Gemini "set, 53 chars", Groq "empty"). Keys were not printed or committed; liveAi and geminiKey fields untouched.
+
+## My Model + LED Starter + converters
+Added: My Model page, LED Starter circuit, KiCad / photo / video -> circuit converters, hover outline fix. Verified in preview: g18, x-photo-live,
+g6, c1, g8, g13. Not verified: real KiCad exports, real hand input on the new page, full g1-g17 re-run after the last change.

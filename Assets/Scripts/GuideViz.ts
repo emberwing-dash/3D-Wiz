@@ -12,6 +12,10 @@ import {DemoHand} from "./GuideDemo"
 import {Seq} from "./GuideVoiceUI"
 import {anchorWorld} from "./GuideUI"
 import {VIZ_PARTS, RC_MOUNTS, RC_WIRES, buildPart, vizPart, Mount} from "./GuideParts"
+import {DemoCtl} from "./GuideDemoCtl"
+
+/** The order the simulated hand attaches the components in. */
+const DEMO_ORDER = ["esp32", "l293d", "servo", "battery", "motor", "led", "resistor", "npn", "diode", "capacitor", "switch"]
 
 const TRAY_NAME: {[id: string]: string} = {esp32: "ESP32", l293d: "L293D", servo: "Servo", battery: "Batt.", motor: "Motor", switch: "Switch", led: "LED", resistor: "Res.", npn: "NPN", diode: "Diode", capacitor: "Cap."}
 
@@ -70,6 +74,13 @@ export class GuideViz {
   private noteText: Text
   private scale = 1.25
   private bar!: SceneObject
+  private instr!: Text
+  private hint!: Text
+  private demoLabel!: Text
+  private pauseLabel!: Text
+  private speedLabel!: Text
+  private tgt!: Text
+  private ctl = new DemoCtl()
 
   constructor(kit: PartKit, parent: SceneObject) {
     this.kit = kit
@@ -131,21 +142,75 @@ export class GuideViz {
     return rt
   }
 
-  private pill(id: string, text: string, x: number, z: number, w: number, color: [number, number, number, number], on: () => void) {
-    const b = this.kit.obj(this.bar, "viz_pill_" + id, [x, 0, 0])
+  /** `takes` = a tap on this pill ends the auto demo first (every pill except PAUSE / SPEED, which steer the running demo). */
+  private pill(id: string, text: string, x: number, z: number, w: number, color: [number, number, number, number], on: () => void, y: number = 0, takes: boolean = true): Text {
+    const b = this.kit.obj(this.bar, "viz_pill_" + id, [x, y, 0])
     const f = this.kit.obj(b, "face")
     rrect(f, "plate", w, 2.0, 0.9, color, 0, {size: 0.12, color: [0.8, 0.95, 1, 0.9]})
-    label(f, "l", text, 17, new vec3(0, 0, 0.3), TEXT_LIGHT, true)
-    makeTap(this.kit.obj(f, "viz_hit_" + id), new vec3(w + 0.4, 2.6, 2), () => (this.takeOver(), on()))
+    const lab = label(f, "l", text, 17, new vec3(0, 0, 0.3), TEXT_LIGHT, true)
+    makeTap(this.kit.obj(f, "viz_hit_" + id), new vec3(w + 0.4, 2.6, 2), () => {
+      if (takes) this.takeOver()
+      on()
+    })
     this.pills[id] = b
+    return lab
   }
 
   private buildPills() {
     this.bar = this.kit.obj(this.root, "VizToolbar")
-    this.pill("menu", "MENU", -6.8, -10.0, 3.4, [0.6, 0.25, 0.25, 0.95], () => this.onMenu && this.onMenu())
-    this.pill("xray", "SEE-THRU", -2.6, -10.0, 4.6, [0.12, 0.3, 0.5, 0.95], () => this.toggleXray())
-    this.pill("reset", "RESET", 2.3, -10.0, 3.6, [0.12, 0.3, 0.5, 0.95], () => this.resetParts())
-    this.pill("demo", "DEMO", 6.9, -10.0, 3.8, [0.1, 0.5, 0.3, 0.95], () => (this.demoRunning ? this.stopDemo() : this.startDemo()))
+    // one line that says what to do, always visible; BACK TO MENU on the left
+    this.instr = label(this.bar, "instr", "Drag a part from the tray onto its glowing outline", 24, new vec3(0, 2.8, 0), TEXT_LIGHT, true)
+    // the live status line of the auto demo (which part, how far), above the instruction (below the toolbar it would sit on the car)
+    this.hint = label(this.bar, "hint", "AUTO DEMO", 17, new vec3(0, 5.4, 0), TEXT_DIM)
+    this.hint.getSceneObject().enabled = false
+    this.tgt = label(this.work, "VizTarget", "", 18, vec3.zero(), TEXT_LIGHT, true)
+    this.tgt.getSceneObject().enabled = false
+    this.pill("menu", "BACK TO MENU", -6.95, 0, 6.4, [0.6, 0.25, 0.25, 0.95], () => this.onMenu && this.onMenu())
+    this.pill("xray", "SEE-THRU", -1.15, 0, 4.2, [0.12, 0.3, 0.5, 0.95], () => this.toggleXray())
+    this.pill("reset", "RESET", 3.15, 0, 3.4, [0.12, 0.3, 0.5, 0.95], () => this.resetParts())
+    // the demo pill toggles the demo itself (WATCH DEMO <-> TAKE OVER): with `takes` it would stop the demo and then start it again
+    this.demoLabel = this.pill("demo", "WATCH DEMO", 7.75, 0, 4.8, [0.1, 0.5, 0.3, 0.95], () => (this.demoRunning ? this.stopDemo() : this.startDemo()), 0, false)
+    // second row: steer the running demo (they never end it)
+    // (a column at the right edge, where nothing else is: a row under the toolbar would sit on top of the car)
+    this.pauseLabel = this.pill("pause", "PAUSE", 11.4, 0, 3.8, [0.12, 0.3, 0.5, 0.95], () => {
+      this.ctl.togglePause()
+      this.syncCtl()
+    }, -3.0, false)
+    this.speedLabel = this.pill("speed", "SPEED x1", 11.4, 0, 3.8, [0.12, 0.3, 0.5, 0.95], () => {
+      this.ctl.cycleSpeed()
+      this.syncCtl()
+    }, -5.6, false)
+  }
+
+  private syncCtl() {
+    this.pauseLabel.text = this.ctl.paused ? "RESUME" : "PAUSE"
+    this.speedLabel.text = "SPEED x" + this.ctl.speed
+  }
+
+  /** The demo status line + the floating "goes here" label at the part's mount. */
+  private demoStep(i: number, id: string) {
+    this.hint.text = "AUTO DEMO " + (i + 1) + " / " + DEMO_ORDER.length + ": " + vizPart(id).name + " goes on its glowing outline"
+    const l = this.toLocal(this.mountWorld(id))
+    this.tgt.getTransform().setLocalPosition(new vec3(l.x, l.y + 4.2, l.z))
+    this.tgt.text = vizPart(id).short + " goes here"
+    this.tgt.getSceneObject().enabled = true
+  }
+
+  private demoStepDone() {
+    this.tgt.getSceneObject().enabled = false
+  }
+
+  demoPaused(): boolean {
+    return this.ctl.paused
+  }
+  demoSpeed(): number {
+    return this.ctl.speed
+  }
+  statusText(): string {
+    return this.hint.getSceneObject().enabled ? this.hint.text : ""
+  }
+  targetText(): string {
+    return this.tgt.getSceneObject().enabled ? this.tgt.text : ""
   }
 
   // ------------------------------------------------------------------ geometry helpers (table-local frame)
@@ -340,6 +405,14 @@ export class GuideViz {
     if (!on) this.stopDemo()
   }
 
+  /** World points that must be inside the camera view when the page is open (table centre, toolbar). */
+  viewPoints(): vec3[] {
+    return [this.work.getTransform().getWorldPosition(), this.bar.getTransform().getWorldPosition()]
+  }
+  instructionText(): string {
+    return this.instr.text
+  }
+
   attachedCount(): number {
     return this.parts.filter((p) => p.mount !== "").length
   }
@@ -406,9 +479,11 @@ export class GuideViz {
       this.say("Auto demo: the hand attaches the real components to the printed car")
     })
     s.wait(2.4)
-    const order = ["esp32", "l293d", "servo", "battery", "motor", "led", "resistor", "npn", "diode", "capacitor", "switch"]
-    for (const id of order) {
+    this.ctl.reset()
+    this.syncCtl()
+    DEMO_ORDER.forEach((id, i) => {
       const p = this.parts.filter((x) => x.id === id)[0]
+      s.call(() => this.demoStep(i, id))
       s.moveTo(() => p.root.getTransform().getWorldPosition().add(new vec3(0, 0.6, 0)), 1.5, 1.2)
       s.pinch(true)
       s.call(() => {
@@ -419,9 +494,11 @@ export class GuideViz {
       })
       s.ops.push(this.carryOp(p, () => this.mountWorldLift(id), 2.0))
       s.call(() => this.end(p))
+      s.call(() => this.demoStepDone())
       s.pinch(false)
       s.wait(0.5)
-    }
+    })
+    s.call(() => (this.hint.text = "AUTO DEMO: now the see-through view"))
     s.tap(() => this.pillWorld("xray"), 1.4, () => this.toggleXray())
     s.wait(2.5)
     s.tap(() => this.pillWorld("xray"), 1.0, () => this.toggleXray())
@@ -431,6 +508,9 @@ export class GuideViz {
     this.demoRunning = true
     this.locked = true
     this.startedAt = getTime()
+    this.demoLabel.text = "TAKE OVER"
+    this.hint.text = "AUTO DEMO - tap TAKE OVER to do it yourself"
+    this.hint.getSceneObject().enabled = true
   }
 
   private pillWorld(id: string): vec3 {
@@ -463,6 +543,11 @@ export class GuideViz {
     this.locked = false
     this.ops = []
     this.hand.show(false)
+    this.demoLabel.text = "WATCH DEMO"
+    this.hint.getSceneObject().enabled = false
+    this.tgt.getSceneObject().enabled = false
+    this.ctl.reset()
+    this.syncCtl()
     for (const p of this.parts) {
       if (p.grab) {
         p.grab = false
@@ -478,7 +563,7 @@ export class GuideViz {
   update(dt: number) {
     this.clock += dt
     this.hand.update(dt)
-    this.bar.getTransform().setWorldPosition(anchorWorld(new vec3(0, 11.2, -52)))
+    this.bar.getTransform().setWorldPosition(anchorWorld(new vec3(0, 10.4, -52)))
     const pulse = 1 + 0.12 * Math.sin(this.clock * 4)
     for (const m of this.mounts) if (m.ring.enabled) m.ring.getTransform().setLocalScale(new vec3(pulse, 1, pulse))
     const k = Math.min(1, dt * 10)
@@ -511,7 +596,7 @@ export class GuideViz {
     if (this.demoRunning) {
       const op = this.ops[this.oi]
       if (op === undefined) this.stopDemo()
-      else if (op(dt)) this.oi++
+      else if (op(this.ctl.step(dt))) this.oi++
     }
   }
 }

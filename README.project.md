@@ -143,3 +143,45 @@ See `devpost/design-brief-v2.md` (approved; the original `design-brief.md` is ke
 - **Upload CAD** icon: prompts for a model; the file itself is imported in Lens Studio (see `tools/import-model.md`).
 - Voice is out of this version; no API key is stored anywhere in the Lens.
 - Tests: LEAF c1-c12 (c11 Drive, c12 Phobo / menu / placement). Known failing: `x-ik-reachability` (see the status notes).
+
+## Live AI key (optional)
+
+The demo is fully offline and instant by default. Live Gemini (a background cache and "ASK MORE") needs a key:
+
+1. Copy `.env.example` to `.env` and paste your key after `GEMINI_API_KEY=` (`.env` is git-ignored; never commit it).
+2. Run `powershell -ExecutionPolicy Bypass -File tools/apply-env.ps1` from the project root. It writes the local module `Assets/Scripts/GeminiKeyLocal.ts` (it works with an empty key and never prints the key). Then run `git update-index --skip-worktree Assets/Scripts/GeminiKeyLocal.ts` (the script tries this itself) so the file does not show as modified.
+3. In Lens Studio set `CircuitGuide > liveAi` ON and press play. Key order: the Inspector `geminiKey` field first, else `.env`, else none (offline).
+
+Warnings: rotate any key that was ever pasted into a chat, a file or a screenshot. Clear the Inspector `geminiKey` field before saving or committing. `.virtual-scene.json` and `Assets/Scene.scene` copy Inspector values, so keep them clean too.
+
+## Load your own model (CAD / FBX) on the BUILD page
+
+Lens Studio cannot open a file while the Lens runs, so models are picked from a list. To add yours:
+1. Import your FBX into `Assets/UserModels` (drag it into the Asset Browser).
+2. Make it a prefab (right-click the imported FBX > Create Prefab) so it keeps its meshes as children.
+3. Select the CircuitGuide object, and drag the prefab into **userModels** in the Inspector.
+4. On the BUILD page use the **LOAD MODEL** arrows (< >): RC car, the built-in samples, then your models. The model is fitted to the table,
+   split into grabbable parts by its child meshes, and works with EXPLODE / ASSEMBLE and moving / rotating the whole model.
+
+## Auto build showcase
+
+The BUILD page starts an automatic build: a simulated hand carries each component to its glowing outline, draws each wire pin to pin, shows one
+deliberate mistake (red, the part returns), then powers the car on. A small tutorial video panel (an animated storyboard, a stand-in for a real
+video) follows the step. Pills: PAUSE / STEP / SPEED x1 x2 / MODE (DEMO or YOUR TURN). In YOUR TURN the same outlines wait for your own drops.
+
+## My Model: your own 3D model + your own circuit (new)
+Title menu -> **My Model**. Pick a 3D model (RC car, built-in samples, or anything you added to `CircuitGuide > userModels`), pick a circuit,
+press **START BUILD**. The circuit parts land on the model's top surface (and on the breadboard) with the glowing-spot guide; the **LED Starter**
+(battery, switch, resistor, LED) is the simplest circuit and lights the LED on Play.
+- **KiCad file** -> `node tools/wrap-kicad.mjs your.kicad_sch` writes a JSON asset into `Assets/GuidePacks/`; add it to `CircuitGuide > circuitFiles`.
+  Parts are matched by symbol name (LED, R, battery, switch, motor, servo); nets come from wires, labels and pin positions.
+- **Circuit picture** -> put the image in `CircuitGuide > circuitPhoto` and press **CONVERT PHOTO** (Gemini vision, needs the key + `liveAi`), or run
+  `node tools/media-to-circuit.mjs picture.png` (same result as a JSON asset).
+- **Tutorial video** -> `node tools/media-to-circuit.mjs video.mp4` (uploads to the Gemini Files API, reads the parts and wires, writes the JSON). Done by the tool, not inside the Lens.
+- Samples: `tools/samples/` (a KiCad file, a circuit picture, a tutorial video; `make_samples.py` redraws them).
+- Key: put `GEMINI_API_KEY` in `.env` (git-ignored) and run `tools/apply-env.ps1`. Clear the Inspector `geminiKey` before committing.
+
+Limits: only part types that have a 3D model are supported (LED, resistor, battery, switch, motor, servo, ESP32, L293D). The KiCad import was
+tested on a hand-written KiCad 7-style file, not on real exports. A Lens cannot open a file picker, so "upload" means dropping files into Assets
+and listing them in the Inspector. The hover highlight is now a thin outline (it used to be a solid block); verified on the Analyse page only.
+Tests: g18 (LED + imports) and x-photo-live (real Gemini call) passed; g6, c1, g8, g13 re-run after adding the menu item and passed.

@@ -129,14 +129,11 @@ function capacitor(kit: PartKit, parent: SceneObject) {
   kit.shape(parent, "cyl", [-0.15, 0.04, 0], [0.05, 0.4, 0.05], [0.8, 0.8, 0.82, 1], "legN", true)
 }
 
-/** Instantiate a component under `parent` (origin = bottom centre). Generated models are scaled so their longest side is the real size. */
-export function buildPart(kit: PartKit, parent: SceneObject, id: string, pinSize: number = 0.22): {root: SceneObject; pins: {[id: string]: SceneObject}} {
-  const def = vizPart(id)
-  const root = kit.obj(parent, "part_" + id)
-  const holder = kit.obj(root, "model")
-  if (def.glb.indexOf("code:") === 0) capacitor(kit, holder)
-  else if (def.glb.indexOf("gen:") === 0) {
-    const pf = generated(def.glb.substring(4))
+/** Put the 3D model for `glb` under `holder`: a partPrefab() key, "gen:<name>" (generated, scaled so its longest side is the real size) or "code:capacitor". */
+export function instModel(kit: PartKit, holder: SceneObject, glb: string, sizeCm: V3) {
+  if (glb.indexOf("code:") === 0) capacitor(kit, holder)
+  else if (glb.indexOf("gen:") === 0) {
+    const pf = generated(glb.substring(4))
     if (pf !== null) {
       // measure and normalise in an unrotated, unscaled scratch object, then hang it under the part
       const tmp = global.scene.createSceneObject("tmpMeasure")
@@ -146,7 +143,7 @@ export function buildPart(kit: PartKit, parent: SceneObject, id: string, pinSize
       if (b.any) {
         const size = b.mx.sub(b.mn)
         const longest = Math.max(size.x, size.y, size.z, 0.0001)
-        const k = Math.max(def.sizeCm[0], def.sizeCm[1], def.sizeCm[2]) / longest
+        const k = Math.max(sizeCm[0], sizeCm[1], sizeCm[2]) / longest
         t.setLocalScale(t.getLocalScale().uniformScale(k))
         const b2 = worldBounds(inst)
         t.setLocalPosition(t.getLocalPosition().add(new vec3(-(b2.mn.x + b2.mx.x) / 2, -b2.mn.y, -(b2.mn.z + b2.mx.z) / 2)))
@@ -155,9 +152,17 @@ export function buildPart(kit: PartKit, parent: SceneObject, id: string, pinSize
       tmp.destroy()
     }
   } else {
-    const pf = partPrefab(def.glb)
+    const pf = partPrefab(glb)
     if (pf !== null) pf.instantiate(holder)
   }
+}
+
+/** Instantiate a component under `parent` (origin = bottom centre). Generated models are scaled so their longest side is the real size. */
+export function buildPart(kit: PartKit, parent: SceneObject, id: string, pinSize: number = 0.22): {root: SceneObject; pins: {[id: string]: SceneObject}} {
+  const def = vizPart(id)
+  const root = kit.obj(parent, "part_" + id)
+  const holder = kit.obj(root, "model")
+  instModel(kit, holder, def.glb, def.sizeCm)
   const pins: {[id: string]: SceneObject} = {}
   for (const p of def.pins) {
     const n = kit.obj(root, "pin_" + id + "_" + p.id, p.at)

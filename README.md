@@ -153,3 +153,52 @@ The demo is fully offline and instant by default. Live Gemini (a background cach
 3. In Lens Studio set `CircuitGuide > liveAi` ON and press play. Key order: the Inspector `geminiKey` field first, else `.env`, else none (offline).
 
 Warnings: rotate any key that was ever pasted into a chat, a file or a screenshot. Clear the Inspector `geminiKey` field before saving or committing. `.virtual-scene.json` and `Assets/Scene.scene` copy Inspector values, so keep them clean too.
+
+## Load your own model (CAD / FBX) on the BUILD page
+
+Lens Studio cannot open a file while the Lens runs, so models are picked from a list. To add yours:
+1. Import your FBX into `Assets/UserModels` (drag it into the Asset Browser).
+2. Make it a prefab (right-click the imported FBX > Create Prefab) so it keeps its meshes as children.
+3. Select the CircuitGuide object, and drag the prefab into **userModels** in the Inspector.
+4. On the BUILD page use the **LOAD MODEL** arrows (< >): RC car, the built-in samples, then your models. The model is fitted to the table,
+   split into grabbable parts by its child meshes, and works with EXPLODE / ASSEMBLE and moving / rotating the whole model.
+
+## Auto build showcase
+
+The BUILD page starts an automatic build: a simulated hand carries each component to its glowing outline, draws each wire pin to pin, shows one
+deliberate mistake (red, the part returns), then powers the car on. A small tutorial video panel (an animated storyboard, a stand-in for a real
+video) follows the step. Pills: PAUSE / STEP / SPEED x1 x2 / MODE (DEMO or YOUR TURN). In YOUR TURN the same outlines wait for your own drops.
+
+## My Model: your own 3D model + your own circuit (new)
+Title menu -> **My Model**. Pick a 3D model (RC car, built-in samples, or anything you added to `CircuitGuide > userModels`), pick a circuit,
+press **START BUILD**. The circuit parts land on the model's top surface (and on the breadboard) with the glowing-spot guide; the **LED Starter**
+(battery, switch, resistor, LED) is the simplest circuit and lights the LED on Play.
+- **KiCad file** -> `node tools/wrap-kicad.mjs your.kicad_sch` writes a JSON asset into `Assets/GuidePacks/`; add it to `CircuitGuide > circuitFiles`.
+  Parts are matched by symbol name (LED, R, battery, switch, motor, servo); nets come from wires, labels and pin positions.
+- **Circuit picture** -> put the image in `CircuitGuide > circuitPhoto` and press **CONVERT PHOTO** (Gemini vision, needs the key + `liveAi`), or run
+  `node tools/media-to-circuit.mjs picture.png` (same result as a JSON asset).
+- **Tutorial video** -> `node tools/media-to-circuit.mjs video.mp4` (uploads to the Gemini Files API, reads the parts and wires, writes the JSON). Done by the tool, not inside the Lens.
+- Samples: `tools/samples/` (a KiCad file, a circuit picture, a tutorial video; `make_samples.py` redraws them).
+- Key: put `GEMINI_API_KEY` in `.env` (git-ignored) and run `tools/apply-env.ps1`. Clear the Inspector `geminiKey` before committing.
+
+Limits: only part types that have a 3D model are supported (LED, resistor, battery, switch, motor, servo, ESP32, L293D). The KiCad import was
+tested on a hand-written KiCad 7-style file, not on real exports. A Lens cannot open a file picker, so "upload" means dropping files into Assets
+and listing them in the Inspector. The hover highlight is now a thin outline (it used to be a solid block); verified on the Analyse page only.
+Tests: g18 (LED + imports) and x-photo-live (real Gemini call) passed; g6, c1, g8, g13 re-run after adding the menu item and passed.
+
+![LED Starter built on the MicroD model, guide finished (g18 test overlay in the corner)](docs/screenshots/07-led-build.png)
+
+## API disclosure
+The Lens works fully offline. Two optional third-party AI APIs are used only when you turn `liveAi` on and provide a key.
+
+| Provider | Used for | What is sent | Where the key lives |
+|---|---|---|---|
+| **Google Gemini** (`generativelanguage.googleapis.com`, model `gemini-flash-latest`) | CONVERT PHOTO (reads a circuit picture), ASK MORE answers, step lists; the command-line tool `tools/media-to-circuit.mjs` also uploads a tutorial video via the Gemini Files API | the typed or spoken request text, the part name for ASK MORE, and for CONVERT PHOTO the picture you assigned to `circuitPhoto` | `.env` (git-ignored) via `tools/apply-env.ps1`, or the Inspector `geminiKey` field; sent only in the `x-goog-api-key` header |
+| **Groq** (`api.groq.com`, model `llama-3.3-70b-versatile`) | the voice / typed intent ("build me a robot car"), because it answers fast; fallback for step lists and ASK MORE | the transcript text only | `.env` or Inspector (keys starting `gsk_`), sent as a Bearer header |
+
+- No key, or `liveAi` off: no network call is ever made; a built-in catalogue and part info are used.
+- Max 8 calls per session, answers cached, keys never logged or committed (rotate any key that was ever pasted into a chat or file).
+- Whatever the AI returns is validated against the parts and pins the Lens has 3D models for before it is used.
+- Photos and text sent to these APIs are processed by Google / Groq under their own terms; do not send private images.
+- Groq has not been exercised in a live test; Gemini has (photo conversion, video tool).
+- Spectacles AI features in `WizPhoboAI.ts` use the Remote Service Gateway credentials component, not a key in this project.
